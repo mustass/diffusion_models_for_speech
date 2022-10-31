@@ -1,0 +1,3 @@
+metric:
+  class_name: diffspeak.metrics.ventilator_mae.VentilatorMAE
+  metric_name: ventilator_mae

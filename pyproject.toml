@@ -1,0 +1,12 @@
+[build-system]
+requires = ["setuptools", "wheel", "setuptools_scm>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+write_to = "src/version.py"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"

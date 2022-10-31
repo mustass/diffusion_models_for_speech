@@ -1,0 +1,7 @@
+class_name: diffspeak.schedulers.linear_schedule_with_warmup.LinearScheduleWithWarmupConfig
+step: step
+monitor: train_${training.metric}
+params:
+  num_warmup_steps: 10000 
+  last_epoch: -1
+  
