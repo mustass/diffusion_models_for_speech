@@ -1,14 +1,15 @@
 import os
 import warnings
 from pathlib import Path
+
 import hydra
 import pytorch_lightning as pl
 import torch
 from omegaconf import DictConfig, OmegaConf
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
 from diffspeak.utils.technical_utils import load_obj
-from diffspeak.utils.utils import set_seed, save_useful_info
+from diffspeak.utils.utils import save_useful_info, set_seed
 
 warnings.filterwarnings("ignore")
 

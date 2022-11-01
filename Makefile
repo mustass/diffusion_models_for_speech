@@ -10,8 +10,8 @@ style:
 lint:
 	flake8 $(check_dirs)
 
-tests:
-	pytest -sv tests
+#tests:
+#	pytest -sv tests
 
 clean:
 	rm -rf $(clean_dirs)

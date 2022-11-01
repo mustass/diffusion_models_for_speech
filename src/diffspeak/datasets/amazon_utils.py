@@ -1,25 +1,25 @@
-from cgitb import text
-import gzip
-import pickle
-import pandas as pd
-import numpy as np
 import csv
-import requests
-import zlib
+import gzip
 import json
-from sklearn.preprocessing import LabelEncoder
-import torch
-from tqdm import tqdm
 import os
+import pickle
 import re
-import nltk
 import string
+import zlib
+from cgitb import text
 from os import listdir
 from os.path import isfile, join
-from transformers import AutoTokenizer
-
 from pathlib import Path
+
+import nltk
+import numpy as np
+import pandas as pd
+import requests
+import torch
 from datasets import Dataset
+from sklearn.preprocessing import LabelEncoder
+from tqdm import tqdm
+from transformers import AutoTokenizer
 
 
 def download_dataset(dataset_name, wd, chunk_size=8192):
@@ -208,14 +208,18 @@ def clean_data(config, wd):
     df.drop(["score", "category"], axis=1)
 
     if config.balance_classes:
-        df = df.groupby('score').sample(n=config.n_per_class, replace=True)
+        df = df.groupby("score").sample(n=config.n_per_class, replace=True)
 
     h_df = Dataset.from_pandas(df)
-    h_df = h_df.class_encode_column('label')
+    h_df = h_df.class_encode_column("label")
     df = None
 
-    train_testvalid = h_df.train_test_split(train_size=split,stratify_by_column='label')
-    test_valid = train_testvalid["test"].train_test_split(train_size=0.5,stratify_by_column='label')
+    train_testvalid = h_df.train_test_split(
+        train_size=split, stratify_by_column="label"
+    )
+    test_valid = train_testvalid["test"].train_test_split(
+        train_size=0.5, stratify_by_column="label"
+    )
 
     tokenizer = AutoTokenizer.from_pretrained(config.tokenizer)
 
@@ -338,7 +342,6 @@ def pickle_TensorDataset(dataset, experiment_name, dataset_name, wd):
     )
     pickle.dump(dataset, f)
     f.close()
-
 
 
 ### CODE STOLEN FROM https://medium.com/analytics-vidhya/data-cleaning-in-natural-language-processing-1f77ec1f6406 ####
