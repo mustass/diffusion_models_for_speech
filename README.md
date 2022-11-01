@@ -34,4 +34,4 @@ pip install -r reqiorements-dev.txt
 
 This repo has protection on the ``main`` branch. Therefore any contribution has to go through a Pull Request. 
 
-Make sure to run ``make`` in the root directory and push changes before creating a Pull Request. 
+Make sure to run ``make`` in the root directory and push changes before creating a Pull Request. This will require you to have the packages in `requriements-dev.txt` installed.
