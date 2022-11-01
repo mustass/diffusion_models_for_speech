@@ -1,6 +1,6 @@
 import pickle
 from collections import Counter
-from typing import List, Union, Dict, Tuple, Any, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import numpy.typing as npt

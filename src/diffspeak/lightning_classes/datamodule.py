@@ -1,13 +1,14 @@
-from pytorch_lightning import LightningDataModule
-from torch.utils.data import DataLoader
-from diffspeak.datasets.amazon_utils import ensemble, clean_data
-from hydra.utils import get_original_cwd
-from typing import Optional
-from omegaconf import DictConfig
-from datasets import load_dataset
-
 # This is hackidy-hacky:
 import os
+from typing import Optional
+
+from datasets import load_dataset
+from hydra.utils import get_original_cwd
+from omegaconf import DictConfig
+from pytorch_lightning import LightningDataModule
+from torch.utils.data import DataLoader
+
+from diffspeak.datasets.amazon_utils import clean_data, ensemble
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
 # Hackidy hack over ¯\_(ツ)_/¯
@@ -32,14 +33,18 @@ class AmazonDataModule(LightningDataModule):
         self.train = datasets["train"]
         self.val = datasets["val"]
         self.test = datasets["test"]
-        self.t_total = len(self.train) // self.config.datamodule["batch_size"] * self.config.trainer.max_epochs
+        self.t_total = (
+            len(self.train)
+            // self.config.datamodule["batch_size"]
+            * self.config.trainer.max_epochs
+        )
 
     def train_dataloader(self):
         return DataLoader(
             self.train,
             batch_size=self.config.datamodule["batch_size"],
             num_workers=self.config.datamodule["num_workers"],
-            shuffle=True
+            shuffle=True,
         )
 
     def val_dataloader(self):

@@ -102,7 +102,7 @@ cookiecutter-pypackage-env/
 .vscode/
 
 
-data/SA_amazon_data
+data/
 outputs/
 
 *.ipynb_checkpoints
