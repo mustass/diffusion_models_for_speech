@@ -19,7 +19,7 @@ def preprocess(cfg: DictConfig) -> None:
     """
 
     params = cfg.preprocessing
-    
+
     transformer = load_obj(cfg.preprocessing.transformer)(params)
     transformer.create_spectrograms()
 
