@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 from diffspeak.datasets.preprocessing_utils import transform, ensemble
 from diffspeak.datasets.dataset import from_path
 
+
 class LJSpeechDataModule(LightningDataModule):
     def __init__(self, cfg: DictConfig):
         super().__init__()
@@ -19,11 +20,7 @@ class LJSpeechDataModule(LightningDataModule):
     def setup(self, stage: Optional[str] = None):
         # called on every GPU
 
-        self.dataset = 
-
-
-
-
+        self.dataset = self.load_dataset(folder_path)
 
         datasets = self.load_datasets(
             f'{self.wd}/data/SA_amazon_data/processed/{self.config.datamodule["name"]}/'
