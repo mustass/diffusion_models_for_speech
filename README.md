@@ -27,7 +27,7 @@ This will:
 
 You can further install the requirements for developing the package:
 ```{bash}
-pip install -r reqiorements-dev.txt
+pip install -r requirements-dev.txt
 ```
 
 ## Contribution guide
@@ -35,3 +35,13 @@ pip install -r reqiorements-dev.txt
 This repo has protection on the ``main`` branch. Therefore any contribution has to go through a Pull Request. 
 
 Make sure to run ``make`` in the root directory and push changes before creating a Pull Request. This will require you to have the packages in `requriements-dev.txt` installed.
+
+## Running things and stuffs
+
+### Preprocessing of the LJ dataset
+
+To run conditional training or/and evaluation we need to create spectrograms. This is done by running:
+
+```{bash}
+python3 scripts/preprocess.py
+```

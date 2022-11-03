@@ -8,25 +8,20 @@ from omegaconf import DictConfig
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader
 
-from diffspeak.datasets.amazon_utils import clean_data, ensemble
-
-os.environ["TOKENIZERS_PARALLELISM"] = "true"
-# Hackidy hack over ¯\_(ツ)_/¯
+from diffspeak.datasets.preprocessing_utils import transform, ensemble
+from diffspeak.datasets.dataset import from_path
 
 
-class AmazonDataModule(LightningDataModule):
+class LJSpeechDataModule(LightningDataModule):
     def __init__(self, cfg: DictConfig):
         super().__init__()
         self.config = cfg
-        self.wd = get_original_cwd()
-        self.prepare_data()
-
-    def prepare_data(self):
-        ensemble(self.config.datamodule, self.wd)
-        clean_data(self.config.datamodule, self.wd)
 
     def setup(self, stage: Optional[str] = None):
         # called on every GPU
+
+        self.dataset = self.load_dataset(folder_path)
+
         datasets = self.load_datasets(
             f'{self.wd}/data/SA_amazon_data/processed/{self.config.datamodule["name"]}/'
         )
@@ -61,17 +56,10 @@ class AmazonDataModule(LightningDataModule):
             num_workers=self.config.datamodule["num_workers"],
         )
 
-    def load_datasets(self, folder_path):
+    def load_dataset(self, folder_path):
         try:
-            datasets = load_dataset(
-                "parquet",
-                data_files={
-                    "train": f"{folder_path}train.parquet",
-                    "val": f"{folder_path}val.parquet",
-                    "test": f"{folder_path}test.parquet",
-                },
-            ).with_format("torch")
-            return datasets
+            dataset = from_path(self.config.datamodule)
+            return dataset
         except Exception as ex:
             if type(ex) == FileNotFoundError:
                 raise FileNotFoundError(
