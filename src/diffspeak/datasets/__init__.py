@@ -1,1 +1,1 @@
-from .dataset import lj_speech_from_path, Collator
+from .dataset import Collator, lj_speech_from_path

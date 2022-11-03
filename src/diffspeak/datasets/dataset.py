@@ -2,15 +2,15 @@
 # https://github.com/lmnt-com/diffwave/blob/master/src/diffwave/dataset.py
 # ==============================================================================
 
-import numpy as np
 import random
-import torch
-import torchaudio
+from glob import glob
 from pathlib import Path
 
-from OmegaConf import DictConfig
+import numpy as np
+import torch
+import torchaudio
 from hydra.utils import get_original_cwd
-from glob import glob
+from OmegaConf import DictConfig
 
 
 class AudioDataset(torch.utils.data.Dataset):
@@ -77,7 +77,7 @@ class Collator:
                 # Filter out records that aren't long enough.
                 if (
                     len(record["spectrogram"])
-                    < self.cfg.datamodule.preprocessing.crop_mel_frames
+                    < self.cfg.datamodule.params.crop_mel_frames
                 ):
                     del record["spectrogram"]
                     del record["audio"]
@@ -86,9 +86,9 @@ class Collator:
                 start = random.randint(
                     0,
                     record["spectrogram"].shape[0]
-                    - self.cfg.datamodule.preprocessing.crop_mel_frames,
+                    - self.cfg.datamodule.params.crop_mel_frames,
                 )
-                end = start + self.cfg.datamodule.preprocessing.crop_mel_frames
+                end = start + self.cfg.datamodule.params.crop_mel_frames
                 record["spectrogram"] = record["spectrogram"][start:end].T
 
                 start *= samples_per_frame

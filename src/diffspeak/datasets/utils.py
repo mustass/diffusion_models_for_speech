@@ -2,16 +2,16 @@
 # https://github.com/lmnt-com/diffwave/blob/master/src/diffwave/preprocess.py
 # ==============================================================================
 
+from concurrent.futures import ProcessPoolExecutor
+from glob import glob
+from pathlib import Path
+
 import numpy as np
 import torch
 import torchaudio as T
 import torchaudio.transforms as TT
-from pathlib import Path
-
-from concurrent.futures import ProcessPoolExecutor
-from glob import glob
-from tqdm import tqdm
 from hydra.utils import get_original_cwd
+from tqdm import tqdm
 
 
 class Spectrogrammer:

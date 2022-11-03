@@ -1,11 +1,13 @@
 datamodule_name: diffspeak.lightning_classes.datamodule.LJSpeechDataModule
 path: ./data/tj/raw/LJSpeech-1.1/
 params:
-  conditional: False
+  unconditional: True
   batch_size: 16
   split: [0.9,0.05,0.05]
   num_workers: 4
   audio_len: 110250
+  crop_mel_frames: 62 # Maybe not correct?
+  pin_memory: True
 preprocessing:
   transformer: diffspeak.datasets.utils.Spectrogrammer
   subset_frac: 0.01
@@ -13,4 +15,3 @@ preprocessing:
   n_mels: 80
   n_fft: 1024
   hop_samples: 256
-  crop_mel_frames: 62 # Maybe not correct?

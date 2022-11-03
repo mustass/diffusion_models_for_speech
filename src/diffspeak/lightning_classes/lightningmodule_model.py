@@ -1,15 +1,12 @@
-from typing import Dict, Union
-
 import pytorch_lightning as pl
 import torch
 from omegaconf import DictConfig
-
 from diffspeak.utils.technical_utils import load_obj
 
 
 class LitDiffWaveModel(pl.LightningModule):
     def __init__(self, cfg: DictConfig, steps_total):
-        super(LitSaModel, self).__init__()
+        super(self).__init__()
         self.cfg = cfg
         self.steps_total = steps_total
         self.model = load_obj(cfg.model.class_name)(cfg=cfg)

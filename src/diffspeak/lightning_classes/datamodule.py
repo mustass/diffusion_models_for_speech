@@ -1,4 +1,4 @@
-from datasets import lj_speech_from_path, Collator
+from datasets import Collator, lj_speech_from_path
 from omegaconf import DictConfig
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
@@ -26,6 +26,7 @@ class LJSpeechDataModule(LightningDataModule):
             collate_fn=self.collator.collate,
             batch_size=self.config.datamodule.params.batch_size,
             num_workers=self.config.datamodule.params.num_workers,
+            pin_memory=self.config.datamodule.params.pin_memory,
             shuffle=True,
         )
 
@@ -35,6 +36,7 @@ class LJSpeechDataModule(LightningDataModule):
             collate_fn=self.collator.collate,
             batch_size=self.config.datamodule.params.batch_size,
             num_workers=self.config.datamodule.params.num_workers,
+            pin_memory=self.config.datamodule.params.pin_memory,
         )
 
     def test_dataloader(self):
@@ -43,4 +45,5 @@ class LJSpeechDataModule(LightningDataModule):
             collate_fn=self.collator.collate,
             batch_size=self.config.datamodule.params.batch_size,
             num_workers=self.config.datamodule.params.num_workers,
+            pin_memory=self.config.datamodule.params.pin_memory,
         )
