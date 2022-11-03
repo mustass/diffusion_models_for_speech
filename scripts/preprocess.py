@@ -8,7 +8,6 @@ from omegaconf import DictConfig, OmegaConf
 
 from diffspeak.utils.technical_utils import load_obj
 from diffspeak.utils.utils import save_useful_info, set_seed
-from diffspeak.datasets import Transformer
 
 warnings.filterwarnings("ignore")
 
@@ -20,9 +19,9 @@ def preprocess(cfg: DictConfig) -> None:
     """
 
     params = cfg.preprocessing
-
-    transofrmer = Transformer(params)
-    transofrmer.create_spectrograms()
+    
+    transformer = load_obj(cfg.preprocessing.transformer)(params)
+    transformer.create_spectrograms()
 
 
 @hydra.main(config_path="../configs", config_name="preprocessing_config")

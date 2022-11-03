@@ -15,7 +15,7 @@ from hydra.utils import get_original_cwd
 import os
 
 
-class Transformer:
+class Spectrogrammer:
     def __init__(self, cfg):
         self.cfg = cfg
         self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.path)
