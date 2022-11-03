@@ -1,4 +1,0 @@
-datamodule_name: diffspeak.lightning_classes.datamodule.LJSpeechDataModule
-path: ./data/tj/raw/LJSpeech-1.1/
-params:
-  batch_size: 16

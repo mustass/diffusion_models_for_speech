@@ -2,17 +2,16 @@ defaults:
   - _self_
   - callbacks: callbacks
   - private: default
-  - datamodule: basic
+  - datamodule: ljspeech
   - inference: basic
   - logging: wandb
   - loss: cross_entropy
   - metric: accuracy
   - model: base_model
   - optimizer: adamw
-  - preprocessing: spectrograms
   - scheduler: linearwithwarmup
-  - trainer: base_trainer
-  - training: training
+  - trainer: default_trainer
+  - training: lj_training
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 

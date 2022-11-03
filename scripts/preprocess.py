@@ -1,13 +1,11 @@
 import os
 import warnings
-from pathlib import Path
 
 import hydra
-import torch
 from omegaconf import DictConfig, OmegaConf
 
 from diffspeak.utils.technical_utils import load_obj
-from diffspeak.utils.utils import save_useful_info, set_seed
+from diffspeak.utils.utils import save_useful_info
 
 warnings.filterwarnings("ignore")
 
@@ -18,13 +16,11 @@ def preprocess(cfg: DictConfig) -> None:
     audio synthesis.
     """
 
-    params = cfg.preprocessing
-
-    transformer = load_obj(cfg.preprocessing.transformer)(params)
+    transformer = load_obj(cfg.datamodule.preprocessing.transformer)(cfg)
     transformer.create_spectrograms()
 
 
-@hydra.main(config_path="../configs", config_name="preprocessing_config")
+@hydra.main(config_path="../configs", config_name="config")
 def run_preprocessing(cfg: DictConfig) -> None:
     os.makedirs("logs", exist_ok=True)
     print(OmegaConf.to_yaml(cfg))
