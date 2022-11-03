@@ -8,19 +8,29 @@ import random
 import torch
 import torch.nn.functional as F
 import torchaudio
+from pathlib import Path
+
+from OmegaConf import DictConfig
 
 from glob import glob
 
 
-class ConditionalDataset(torch.utils.data.Dataset):
-    def __init__(self, paths):
+class AudioDataset(torch.utils.data.Dataset):
+    def __init__(self, cfg: DictConfig):
         super().__init__()
+        self.cfg = cfg
         self.filenames = []
-        for path in paths:
-            self.filenames += glob(f"{path}/**/*.wav", recursive=True)
+
+        self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.datamodule.path)
+        self.filenames = glob(f"{self.dataset_root}/**/*.wav", recursive=True)
 
     def __len__(self):
         return len(self.filenames)
+
+
+class ConditionalDataset(AudioDataset):
+    def __init__(self, cfg: DictConfig):
+        super().__init__(cfg)
 
     def __getitem__(self, idx):
         audio_filename = self.filenames[idx]
@@ -30,19 +40,12 @@ class ConditionalDataset(torch.utils.data.Dataset):
         return {"audio": signal[0], "spectrogram": spectrogram.T}
 
 
-class UnconditionalDataset(torch.utils.data.Dataset):
-    def __init__(self, paths):
-        super().__init__()
-        self.filenames = []
-        for path in paths:
-            self.filenames += glob(f"{path}/**/*.wav", recursive=True)
-
-    def __len__(self):
-        return len(self.filenames)
+class UnconditionalDataset(AudioDataset):
+    def __init__(self, cfg):
+        super().__init__(cfg)
 
     def __getitem__(self, idx):
         audio_filename = self.filenames[idx]
-        spec_filename = f"{audio_filename}.spec.npy"
         signal, _ = torchaudio.load(audio_filename)
         return {"audio": signal[0], "spectrogram": None}
 
