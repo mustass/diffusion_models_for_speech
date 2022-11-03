@@ -1,1 +1,3 @@
-datamodule_name: diffspeak.lightning_classes.datamodule.BaseDataModule
+datamodule_name: diffspeak.lightning_classes.datamodule.LJSpeechDataModule
+params:
+  batch_size: 16

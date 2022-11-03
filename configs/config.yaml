@@ -7,16 +7,17 @@ defaults:
   - logging: wandb
   - loss: cross_entropy
   - metric: accuracy
-  - model: basic_bert_model
+  - model: base_model
   - optimizer: adamw
+  - preprocessing: spectrograms
   - scheduler: linearwithwarmup
-  - trainer: default_trainer
+  - trainer: base_trainer
   - training: training
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 
 general:
-  run_name: BertModel_2layers_electronix
+  run_name: test-run
   logs_folder_name: logs
   workspace: workspace-name
   project_name: project-name
