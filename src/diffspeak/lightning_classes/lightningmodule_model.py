@@ -1,6 +1,7 @@
 import pytorch_lightning as pl
 import torch
 from omegaconf import DictConfig
+
 from diffspeak.utils.technical_utils import load_obj
 
 

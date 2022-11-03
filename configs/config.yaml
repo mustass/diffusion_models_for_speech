@@ -7,7 +7,7 @@ defaults:
   - logging: wandb
   - loss: cross_entropy
   - metric: accuracy
-  - model: base_model
+  - model: diffwave_base
   - optimizer: adamw
   - scheduler: linearwithwarmup
   - trainer: default_trainer
