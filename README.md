@@ -36,7 +36,9 @@ This repo has protection on the ``main`` branch. Therefore any contribution has 
 
 Make sure to run ``make`` in the root directory and push changes before creating a Pull Request. This will require you to have the packages in `requriements-dev.txt` installed.
 
-## Preprocessing of the LJ dataset
+## Running things and stuffs
+
+### Preprocessing of the LJ dataset
 
 To run conditional training or/and evaluation we need to create spectrograms. This is done by running:
 
