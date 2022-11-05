@@ -1,0 +1,6 @@
+lr: 2e-4
+metric: ${metric.metric.metric_name}
+mode: "max"
+seed: 666
+debug: True
+lightning_module_name: diffspeak.lightning_classes.lightningmodule_model.LitDiffWaveModel

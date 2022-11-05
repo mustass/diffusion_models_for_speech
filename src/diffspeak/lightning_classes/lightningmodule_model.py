@@ -1,5 +1,4 @@
-from typing import Dict, Union
-
+import numpy as np
 import pytorch_lightning as pl
 import torch
 from omegaconf import DictConfig
@@ -8,10 +7,10 @@ from diffspeak.utils.technical_utils import load_obj
 
 
 class LitDiffWaveModel(pl.LightningModule):
-    def __init__(self, cfg: DictConfig, steps_total):
-        super(LitSaModel, self).__init__()
+    def __init__(self, cfg: DictConfig):
+        super().__init__()
         self.cfg = cfg
-        self.steps_total = steps_total
+
         self.model = load_obj(cfg.model.class_name)(cfg=cfg)
         self.loss = load_obj(cfg.loss.class_name)()
 
@@ -23,26 +22,22 @@ class LitDiffWaveModel(pl.LightningModule):
             }
         )
 
+        beta = np.array(self.model.noise_schedule)
+        noise_level = np.cumprod(1 - beta)
+        self.noise_level = torch.tensor(noise_level.astype(np.float32))
+
     def forward(self, x, mask, *args, **kwargs):
-        return self.model(x, mask)
+        print(f"Getting {x} for lightning module forward.")
+        return self.model(x)
 
     def configure_optimizers(self):
         optimizer = load_obj(self.cfg.optimizer.class_name)(
             self.model.parameters(), **self.cfg.optimizer.params
         )
-        if (
-            self.cfg.scheduler.class_name
-            == "diffspeak.schedulers.linear_schedule_with_warmup.LinearScheduleWithWarmupConfig"
-        ):
-            scheduler = load_obj(self.cfg.scheduler.class_name)(
-                optimizer,
-                num_training_steps=self.steps_total,
-                **self.cfg.scheduler.params,
-            )
-        else:
-            scheduler = load_obj(self.cfg.scheduler.class_name)(
-                optimizer, **self.cfg.scheduler.params
-            )
+
+        scheduler = load_obj(self.cfg.scheduler.class_name)(
+            optimizer, **self.cfg.scheduler.params
+        )
 
         return (
             [optimizer],
@@ -56,17 +51,27 @@ class LitDiffWaveModel(pl.LightningModule):
         )
 
     def training_step(self, batch, batch_idx):
-        label = batch["label"]
-        dat = batch["input_ids"]
-        mask = batch["attention_mask"]
-        logits = self.model(dat, mask)
-        loss = self.loss(logits, label)
+        audio = batch["audio"]
+        spectrogram = batch["spectrogram"]
+
+        N, T = audio.shape
+
+        t = torch.randint(0, len(self.model.noise_schedule), [N])
+        noise_scale = self.noise_level[t].unsqueeze(1)
+        noise_scale_sqrt = noise_scale**0.5
+        noise = torch.randn_like(audio)
+        noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
+
+        predicted = self.model(noisy_audio, t, spectrogram)
+        loss = self.loss(noise, predicted.squeeze(1))
         self.log(
             "train_Loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )
 
         for metric in self.metrics:
-            score = self.metrics[metric](logits, label)
+            score = self.metrics[metric](
+                noise, predicted.squeeze(1)
+            )  # lol, this probably makes no sense. But I do not know what metrics make sense right now.
             self.log(
                 f"train_{metric}",
                 score,
@@ -79,17 +84,26 @@ class LitDiffWaveModel(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        label = batch["label"]
-        dat = batch["input_ids"]
-        mask = batch["attention_mask"]
-        logits = self.model(dat, mask)
-        loss = self.loss(logits, label)
+        audio = batch["audio"]
+        spectrogram = batch["spectrogram"]
+
+        N, T = audio.shape
+
+        t = torch.randint(0, len(self.model.noise_schedule), [N])
+        noise_scale = self.noise_level[t].unsqueeze(1)
+        noise_scale_sqrt = noise_scale**0.5
+        noise = torch.randn_like(audio)
+        noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
+
+        predicted = self.model(noisy_audio, t, spectrogram)
+        loss = self.loss(noise, predicted.squeeze(1))
+
         self.log(
             "val_Loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )
 
         for metric in self.metrics:
-            score = self.metrics[metric](logits, label)
+            score = self.metrics[metric](noise, predicted.squeeze(1))
             self.log(
                 f"val_{metric}",
                 score,
@@ -100,17 +114,26 @@ class LitDiffWaveModel(pl.LightningModule):
             )
 
     def test_step(self, batch, batch_idx):
-        label = batch["label"]
-        dat = batch["input_ids"]
-        mask = batch["attention_mask"]
-        logits = self.model(dat, mask)
-        loss = self.loss(logits, label)
+        audio = batch["audio"]
+        spectrogram = batch["spectrogram"]
+
+        N, T = audio.shape
+
+        t = torch.randint(0, len(self.model.noise_schedule), [N])
+        noise_scale = self.noise_level[t].unsqueeze(1)
+        noise_scale_sqrt = noise_scale**0.5
+        noise = torch.randn_like(audio)
+        noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
+
+        predicted = self.model(noisy_audio, t, spectrogram)
+        loss = self.loss(noise, predicted.squeeze(1))
+
         self.log(
             "test_Loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True
         )
 
         for metric in self.metrics:
-            score = self.metrics[metric](logits, label)
+            score = self.metrics[metric](noise, predicted.squeeze(1))
             self.log(
                 f"test_{metric}",
                 score,

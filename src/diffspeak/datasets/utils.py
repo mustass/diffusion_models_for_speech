@@ -2,22 +2,21 @@
 # https://github.com/lmnt-com/diffwave/blob/master/src/diffwave/preprocess.py
 # ==============================================================================
 
+from concurrent.futures import ProcessPoolExecutor
+from glob import glob
+from pathlib import Path
+
 import numpy as np
 import torch
 import torchaudio as T
 import torchaudio.transforms as TT
-from pathlib import Path
-
-from concurrent.futures import ProcessPoolExecutor
-from glob import glob
-from tqdm import tqdm
 from hydra.utils import get_original_cwd
-import os
+from tqdm import tqdm
 
 
 class Spectrogrammer:
     def __init__(self, cfg):
-        self.cfg = cfg
+        self.cfg = cfg.datamodule
         self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.path)
 
         Path(self.dataset_root / "spectrograms").mkdir(parents=True, exist_ok=True)
@@ -26,17 +25,17 @@ class Spectrogrammer:
         audio, sr = T.load(filename)
         audio = torch.clamp(audio[0], -1.0, 1.0)
 
-        if self.cfg.sample_rate != sr:
+        if self.cfg.preprocessing.sample_rate != sr:
             raise ValueError(f"Invalid sample rate {sr}.")
 
         mel_args = {
             "sample_rate": sr,
-            "win_length": self.cfg.hop_samples * 4,
-            "hop_length": self.cfg.hop_samples,
-            "n_fft": self.cfg.n_fft,
+            "win_length": self.cfg.preprocessing.hop_samples * 4,
+            "hop_length": self.cfg.preprocessing.hop_samples,
+            "n_fft": self.cfg.preprocessing.n_fft,
             "f_min": 20.0,
             "f_max": sr / 2.0,
-            "n_mels": self.cfg.n_mels,
+            "n_mels": self.cfg.preprocessing.n_mels,
             "power": 1.0,
             "normalized": True,
         }
@@ -54,8 +53,10 @@ class Spectrogrammer:
 
     def create_spectrograms(self):
         filenames = glob(f"{self.dataset_root}/**/*.wav", recursive=True)
-        if self.cfg.subset_frac < 1:
-            filenames = filenames[0 : int(len(filenames) * self.cfg.subset_frac)]
+        if self.cfg.preprocessing.subset_frac < 1:
+            filenames = filenames[
+                0 : int(len(filenames) * self.cfg.preprocessing.subset_frac)
+            ]
         with ProcessPoolExecutor() as executor:
             list(
                 tqdm(

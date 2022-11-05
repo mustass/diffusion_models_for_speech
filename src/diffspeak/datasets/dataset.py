@@ -2,69 +2,71 @@
 # https://github.com/lmnt-com/diffwave/blob/master/src/diffwave/dataset.py
 # ==============================================================================
 
-import numpy as np
-import os
 import random
-import torch
-import torch.nn.functional as F
-import torchaudio
-
 from glob import glob
+from pathlib import Path
+
+import numpy as np
+import torch
+import torchaudio
+from hydra.utils import get_original_cwd
+from omegaconf import DictConfig
 
 
-class ConditionalDataset(torch.utils.data.Dataset):
-    def __init__(self, paths):
+class AudioDataset(torch.utils.data.Dataset):
+    def __init__(self, cfg: DictConfig):
         super().__init__()
+        self.cfg = cfg
         self.filenames = []
-        for path in paths:
-            self.filenames += glob(f"{path}/**/*.wav", recursive=True)
+
+        self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.datamodule.path)
+        self.spectrograms_path = self.dataset_root / "spectrograms"
+        self.filenames = glob(f"{self.dataset_root}/**/*.wav", recursive=True)
 
     def __len__(self):
         return len(self.filenames)
 
+
+class ConditionalDataset(AudioDataset):
+    def __init__(self, cfg: DictConfig):
+        super().__init__(cfg)
+
     def __getitem__(self, idx):
         audio_filename = self.filenames[idx]
-        spec_filename = f"{audio_filename}.spec.npy"
+        spec_filename = f"{self.spectrograms_path / Path(audio_filename).name}.spec.npy"
         signal, _ = torchaudio.load(audio_filename)
         spectrogram = np.load(spec_filename)
         return {"audio": signal[0], "spectrogram": spectrogram.T}
 
 
-class UnconditionalDataset(torch.utils.data.Dataset):
-    def __init__(self, paths):
-        super().__init__()
-        self.filenames = []
-        for path in paths:
-            self.filenames += glob(f"{path}/**/*.wav", recursive=True)
-
-    def __len__(self):
-        return len(self.filenames)
+class UnconditionalDataset(AudioDataset):
+    def __init__(self, cfg):
+        super().__init__(cfg)
 
     def __getitem__(self, idx):
         audio_filename = self.filenames[idx]
-        spec_filename = f"{audio_filename}.spec.npy"
         signal, _ = torchaudio.load(audio_filename)
         return {"audio": signal[0], "spectrogram": None}
 
 
 class Collator:
-    def __init__(self, params):
-        self.params = params
+    def __init__(self, cfg):
+        self.cfg = cfg
 
     def collate(self, minibatch):
-        samples_per_frame = self.params.hop_samples
+        samples_per_frame = self.cfg.datamodule.preprocessing.hop_samples
         for record in minibatch:
-            if self.params.unconditional:
+            if self.cfg.datamodule.params.unconditional:
                 # Filter out records that aren't long enough.
-                if len(record["audio"]) < self.params.audio_len:
+                if len(record["audio"]) < self.cfg.datamodule.params.audio_len:
                     del record["spectrogram"]
                     del record["audio"]
                     continue
 
                 start = random.randint(
-                    0, record["audio"].shape[-1] - self.params.audio_len
+                    0, record["audio"].shape[-1] - self.cfg.datamodule.params.audio_len
                 )
-                end = start + self.params.audio_len
+                end = start + self.cfg.datamodule.params.audio_len
                 record["audio"] = record["audio"][start:end]
                 record["audio"] = np.pad(
                     record["audio"],
@@ -73,15 +75,20 @@ class Collator:
                 )
             else:
                 # Filter out records that aren't long enough.
-                if len(record["spectrogram"]) < self.params.crop_mel_frames:
+                if (
+                    len(record["spectrogram"])
+                    < self.cfg.datamodule.params.crop_mel_frames
+                ):
                     del record["spectrogram"]
                     del record["audio"]
                     continue
 
                 start = random.randint(
-                    0, record["spectrogram"].shape[0] - self.params.crop_mel_frames
+                    0,
+                    record["spectrogram"].shape[0]
+                    - self.cfg.datamodule.params.crop_mel_frames,
                 )
-                end = start + self.params.crop_mel_frames
+                end = start + self.cfg.datamodule.params.crop_mel_frames
                 record["spectrogram"] = record["spectrogram"][start:end].T
 
                 start *= samples_per_frame
@@ -94,7 +101,7 @@ class Collator:
                 )
 
         audio = np.stack([record["audio"] for record in minibatch if "audio" in record])
-        if self.params.unconditional:
+        if self.cfg.datamodule.params.unconditional:
             return {
                 "audio": torch.from_numpy(audio),
                 "spectrogram": None,
@@ -107,48 +114,10 @@ class Collator:
             "spectrogram": torch.from_numpy(spectrogram),
         }
 
-    # for gtzan
-    def collate_gtzan(self, minibatch):
-        ldata = []
-        mean_audio_len = self.params.audio_len  # change to fit in gpu memory
-        # audio total generated time = audio_len * sample_rate
-        # GTZAN statistics
-        # max len audio 675808; min len audio sample 660000; mean len audio sample 662117
-        # max audio sample 1; min audio sample -1; mean audio sample -0.0010 (normalized)
-        # sample rate of all is 22050
-        for data in minibatch:
-            if data[0].shape[-1] < mean_audio_len:  # pad
-                data_audio = F.pad(
-                    data[0],
-                    (0, mean_audio_len - data[0].shape[-1]),
-                    mode="constant",
-                    value=0,
-                )
-            elif data[0].shape[-1] > mean_audio_len:  # crop
-                start = random.randint(0, data[0].shape[-1] - mean_audio_len)
-                end = start + mean_audio_len
-                data_audio = data[0][:, start:end]
-            else:
-                data_audio = data[0]
-            ldata.append(data_audio)
-        audio = torch.cat(ldata, dim=0)
-        return {
-            "audio": audio,
-            "spectrogram": None,
-        }
 
-
-def from_path(data_dirs):
-    if params.unconditional:
-        dataset = UnconditionalDataset(data_dirs)
-    else:  # with condition
-        dataset = ConditionalDataset(data_dirs)
-    return torch.utils.data.DataLoader(
-        dataset,
-        batch_size=params.batch_size,
-        collate_fn=Collator(params).collate,
-        shuffle=True,
-        num_workers=os.cpu_count(),
-        pin_memory=True,
-        drop_last=True,
-    )
+def lj_speech_from_path(cfg):
+    if cfg.datamodule.params.unconditional:
+        dataset = UnconditionalDataset(cfg)
+    else:  # with spectrograms
+        dataset = ConditionalDataset(cfg)
+    return dataset

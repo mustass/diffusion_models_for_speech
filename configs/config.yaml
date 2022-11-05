@@ -2,17 +2,16 @@ defaults:
   - _self_
   - callbacks: callbacks
   - private: default
-  - datamodule: basic
+  - datamodule: ljspeech
   - inference: basic
   - logging: wandb
-  - loss: cross_entropy
-  - metric: accuracy
-  - model: base_model
-  - optimizer: adamw
-  - preprocessing: spectrograms
+  - loss: L1loss
+  - metric: snr
+  - model: diffwave_base
+  - optimizer: adam
   - scheduler: linearwithwarmup
-  - trainer: base_trainer
-  - training: training
+  - trainer: default_trainer
+  - training: lj_training
   - override hydra/hydra_logging: colorlog
   - override hydra/job_logging: colorlog
 
@@ -33,4 +32,4 @@ hydra:
     dir: outputs/${now:%Y-%m-%d_%H-%M-%S}
   sweep:
     dir: outputs/${now:%Y-%m-%d_%H-%M-%S}
-    subdir: ${now:%Y-%m-%d_%H-%M-%S}_${hydra.job.num}_${datamodule.fold_n}
+    #subdir: ${now:%Y-%m-%d_%H-%M-%S}_${hydra.job.num}_${datamodule.fold_n}

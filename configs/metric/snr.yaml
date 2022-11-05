@@ -1,0 +1,5 @@
+metric:
+  class_name: torchmetrics.SignalNoiseRatio
+  metric_name: signal_2_noise_ratio
+  params:
+    zero_mean: False

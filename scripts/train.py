@@ -75,7 +75,7 @@ def run(cfg: DictConfig) -> None:
             torch.save(model.model.state_dict(), model_name)
 
 
-@hydra.main(config_path="../configs", config_name="amazon_config")
+@hydra.main(config_path="../configs", config_name="config")
 def run_model(cfg: DictConfig) -> None:
     os.makedirs("logs", exist_ok=True)
     print(OmegaConf.to_yaml(cfg))
