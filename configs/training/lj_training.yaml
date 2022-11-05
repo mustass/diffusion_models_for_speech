@@ -3,4 +3,4 @@ metric: ${metric.metric.metric_name}
 mode: "max"
 seed: 666
 debug: True
-lightning_module_name: diffspeak.lightning_classes.lightningmodule_model.Model
+lightning_module_name: diffspeak.lightning_classes.lightningmodule_model.LitDiffWaveModel

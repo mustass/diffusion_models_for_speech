@@ -10,7 +10,7 @@ import numpy as np
 import torch
 import torchaudio
 from hydra.utils import get_original_cwd
-from OmegaConf import DictConfig
+from omegaconf import DictConfig
 
 
 class AudioDataset(torch.utils.data.Dataset):
@@ -56,7 +56,7 @@ class Collator:
     def collate(self, minibatch):
         samples_per_frame = self.cfg.datamodule.preprocessing.hop_samples
         for record in minibatch:
-            if self.datamodule.params.unconditional:
+            if self.cfg.datamodule.params.unconditional:
                 # Filter out records that aren't long enough.
                 if len(record["audio"]) < self.cfg.datamodule.params.audio_len:
                     del record["spectrogram"]
@@ -101,7 +101,7 @@ class Collator:
                 )
 
         audio = np.stack([record["audio"] for record in minibatch if "audio" in record])
-        if self.datamodule.params.unconditional:
+        if self.cfg.datamodule.params.unconditional:
             return {
                 "audio": torch.from_numpy(audio),
                 "spectrogram": None,
