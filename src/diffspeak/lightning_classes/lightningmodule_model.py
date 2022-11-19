@@ -22,10 +22,6 @@ class LitDiffWaveModel(pl.LightningModule):
             }
         )
 
-        beta = np.array(self.model.noise_schedule)
-        noise_level = np.cumprod(1 - beta)
-        self.noise_level = torch.tensor(noise_level.astype(np.float32))
-
     def forward(self, x, mask, *args, **kwargs):
         print(f"Getting {x} for lightning module forward.")
         return self.model(x)
@@ -57,7 +53,7 @@ class LitDiffWaveModel(pl.LightningModule):
         N, T = audio.shape
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
-        noise_scale = self.noise_level[t].unsqueeze(1)
+        noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
         noise_scale_sqrt = noise_scale**0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
@@ -90,7 +86,7 @@ class LitDiffWaveModel(pl.LightningModule):
         N, T = audio.shape
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
-        noise_scale = self.noise_level[t].unsqueeze(1)
+        noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
         noise_scale_sqrt = noise_scale**0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
@@ -120,7 +116,7 @@ class LitDiffWaveModel(pl.LightningModule):
         N, T = audio.shape
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
-        noise_scale = self.noise_level[t].unsqueeze(1)
+        noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
         noise_scale_sqrt = noise_scale**0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise

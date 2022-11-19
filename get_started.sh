@@ -3,6 +3,8 @@ echo "#### Installing the package in editable mode... ####"
 pip install -e .
 echo "#### Checking and creating data folder if it does not exist ####"
 mkdir -p ./data/tj/external
+mkdir -p ./data/tj/raw
+
 
 FILE_TAR=./data/tj/external/LJSpeech-1.1.tar.bz2
 FILE_metadata=./data/tj/raw/LJSpeech-1.1/metadata.csv
