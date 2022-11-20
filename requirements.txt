@@ -17,4 +17,3 @@ hydra_colorlog
 rich
 six
 filelock
-diffwave
