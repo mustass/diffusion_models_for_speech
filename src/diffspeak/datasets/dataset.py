@@ -71,7 +71,7 @@ class Collator:
                     0, record["audio"].shape[-1] - self.cfg.datamodule.params.audio_len
                 )
                 end = start + self.cfg.datamodule.params.audio_len
-                record["audio"] = torch.squeeze(record["audio"][:, start:end])
+                record["audio"] = torch.squeeze(record["audio"][start:end])
                 record["audio"] = F.pad(
                     record["audio"],
                     (0, (end - start) - len(record["audio"])),
@@ -99,7 +99,7 @@ class Collator:
                 start *= samples_per_frame
                 end *= samples_per_frame
                 record["audio"] = torch.squeeze(
-                    record["audio"][:, start:end]
+                    record["audio"][start:end]
                 )  # Depends on the shape here
                 record["audio"] = F.pad(
                     record["audio"],
