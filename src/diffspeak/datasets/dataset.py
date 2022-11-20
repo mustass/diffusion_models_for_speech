@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 import torchaudio
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
@@ -35,7 +36,9 @@ class ConditionalDataset(AudioDataset):
         audio_filename = self.filenames[idx]
         spec_filename = f"{self.spectrograms_path / Path(audio_filename).name}.spec.npy"
         signal, _ = torchaudio.load(audio_filename)
-        spectrogram = np.load(spec_filename)
+        spectrogram = np.load(
+            spec_filename
+        )  # TODO: this needs to be torch? Maybe we can save it as torch during the preprocessing
         return {"audio": signal[0], "spectrogram": spectrogram.T}
 
 
@@ -55,6 +58,7 @@ class Collator:
 
     def collate(self, minibatch):
         samples_per_frame = self.cfg.datamodule.preprocessing.hop_samples
+
         for record in minibatch:
             if self.cfg.datamodule.params.unconditional:
                 # Filter out records that aren't long enough.
@@ -67,11 +71,12 @@ class Collator:
                     0, record["audio"].shape[-1] - self.cfg.datamodule.params.audio_len
                 )
                 end = start + self.cfg.datamodule.params.audio_len
-                record["audio"] = record["audio"][start:end]
-                record["audio"] = np.pad(
+                record["audio"] = torch.squeeze(record["audio"][:, start:end])
+                record["audio"] = F.pad(
                     record["audio"],
                     (0, (end - start) - len(record["audio"])),
                     mode="constant",
+                    value=0,
                 )
             else:
                 # Filter out records that aren't long enough.
@@ -93,25 +98,31 @@ class Collator:
 
                 start *= samples_per_frame
                 end *= samples_per_frame
-                record["audio"] = record["audio"][start:end]
-                record["audio"] = np.pad(
+                record["audio"] = torch.squeeze(
+                    record["audio"][:, start:end]
+                )  # Depends on the shape here
+                record["audio"] = F.pad(
                     record["audio"],
                     (0, (end - start) - len(record["audio"])),
                     mode="constant",
+                    value=0,
                 )
 
-        audio = np.stack([record["audio"] for record in minibatch if "audio" in record])
+        audio = torch.stack(
+            [record["audio"] for record in minibatch if "audio" in record]
+        )
+
         if self.cfg.datamodule.params.unconditional:
             return {
-                "audio": torch.from_numpy(audio),
+                "audio": audio,
                 "spectrogram": None,
             }
-        spectrogram = np.stack(
+        spectrogram = torch.stack(
             [record["spectrogram"] for record in minibatch if "spectrogram" in record]
         )
         return {
-            "audio": torch.from_numpy(audio),
-            "spectrogram": torch.from_numpy(spectrogram),
+            "audio": audio,
+            "spectrogram": spectrogram,
         }
 
 

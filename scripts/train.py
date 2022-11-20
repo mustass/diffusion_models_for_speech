@@ -46,7 +46,11 @@ def run(cfg: DictConfig) -> None:
     callbacks.append(EarlyStopping(**cfg.callbacks.early_stopping.params))
     callbacks.append(ModelCheckpoint(**cfg.callbacks.model_checkpoint.params))
 
-    trainer = pl.Trainer(logger=loggers, callbacks=callbacks, **cfg.trainer,)
+    trainer = pl.Trainer(
+        logger=loggers,
+        callbacks=callbacks,
+        **cfg.trainer,
+    )
 
     dm = load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
     dm.setup()
