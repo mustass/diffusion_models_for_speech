@@ -15,4 +15,4 @@ source ../venv/bin/activate
 
 wandb login 416fd1dfa8ee3782fc641b91dca3208060d71d34
 echo "Running script..."
-python3 ./scripts/train.py trainer.gpus=1 trainer.accelerator=gpu 
+python3 ./scripts/train.py datamodule.params.audio_len=75000 datamodule.params.batch_size=8 trainer.gpus=1 trainer.accelerator=gpu 
