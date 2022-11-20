@@ -10,7 +10,7 @@ params:
   pin_memory: True
 preprocessing:
   transformer: diffspeak.datasets.utils.Spectrogrammer
-  subset_frac: 0.01
+  subset_frac: 1
   sample_rate: 22050
   n_mels: 80
   n_fft: 1024
