@@ -125,7 +125,9 @@ class DiffWave(nn.Module):
         self.params = cfg.model.params
         self.input_projection = Conv1d(1, self.params.residual_channels, 1)
         self.noise_schedule = torch.linspace(1e-4, 0.05, 50)
-        self.noise_level = torch.cumprod(torch.ones_like(self.noise_schedule) - self.noise_schedule,0)
+        self.noise_level = torch.cumprod(
+            torch.ones_like(self.noise_schedule) - self.noise_schedule, 0
+        )
         self.diffusion_embedding = DiffusionEmbedding(len(self.noise_schedule))
 
         if self.params.unconditional:  # use unconditional model
