@@ -18,6 +18,8 @@ def preprocess(cfg: DictConfig) -> None:
 
     transformer = load_obj(cfg.datamodule.preprocessing.transformer)(cfg)
     transformer.create_spectrograms()
+    audiolengainer = load_obj('diffspeak.datasets.utils.AudioLenGainer')(cfg)
+    audiolengainer.create_audio_lengths()
 
 
 @hydra.main(config_path="../configs", config_name="config")
