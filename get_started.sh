@@ -1,5 +1,7 @@
 #!/bin/bash
 echo "#### Installing the package in editable mode... ####"
+python3 -m venv ../venv
+source ../venv/bin/activate
 pip install -e .
 echo "#### Checking and creating data folder if it does not exist ####"
 mkdir -p ./data/tj/external
