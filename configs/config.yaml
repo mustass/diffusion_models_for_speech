@@ -16,10 +16,10 @@ defaults:
   - override hydra/job_logging: colorlog
 
 general:
-  run_name: test-run
+  run_name: run
   logs_folder_name: logs
-  workspace: workspace-name
-  project_name: project-name
+  workspace: dmiai-mh
+  project_name: DL2022
   device: cpu
   log_code: False
   save_pytorch_model: True
