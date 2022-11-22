@@ -12,6 +12,7 @@ joblib
 pyyaml
 nltk
 hydra-core
+torchaudio
 pytorch-lightning
 hydra_colorlog
 rich
