@@ -75,6 +75,6 @@ class AudioLenGainer:
     def create_audio_lengths(self):
         filenames = glob(f"{self.dataset_root}/**/*.wav", recursive=True)
         for path in tqdm(filenames):
-            self.audio_lengths.append({'path': Path(path).name, 'lenght': torchaudio.load(path)[0].shape[1]})
+            self.audio_lengths.append({'path': Path(path).relative_to(get_original_cwd()), 'length': torchaudio.load(path)[0].shape[1]})
         df = pd.DataFrame(self.audio_lengths)
-        df.to_csv(self.dataset_root / 'audio_lenghts.csv')
+        df.to_csv(self.dataset_root / 'audio_lenghts.csv', index=False)
