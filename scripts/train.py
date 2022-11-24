@@ -10,6 +10,8 @@ from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
 from diffspeak.utils.technical_utils import load_obj
 from diffspeak.utils.utils import save_useful_info, set_seed
+from diffspeak.utils.config_utils import sanity_check
+
 
 warnings.filterwarnings("ignore")
 
@@ -77,6 +79,7 @@ def run(cfg: DictConfig) -> None:
 
 @hydra.main(config_path="../configs", config_name="config")
 def run_model(cfg: DictConfig) -> None:
+    sanity_check(cfg)
     os.makedirs("logs", exist_ok=True)
     print(OmegaConf.to_yaml(cfg))
     if cfg.general.log_code:
