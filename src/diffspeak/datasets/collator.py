@@ -32,17 +32,6 @@ class Collator:
         }
 
 
-class DeleteShortsCollator(Collator):
-    def __init__(self, cfg) -> None:
-        super().__init__(cfg)
-
-    def collate(self, minibatch):
-        for record in minibatch:
-            delete_shorts(self.cfg, record)
-            subsample(self.cfg, record)
-        return self.assamble(minibatch)
-
-
 class ZeroPadCollator(Collator):
     def __init__(self, cfg) -> None:
         super().__init__(cfg)
