@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pandas as pd
 import torch
-import torchaudio
-import torchaudio.transforms as T
+import torchaudio as T
+import torchaudio.transforms as TT
 from hydra.utils import get_original_cwd
 from tqdm import tqdm
 
@@ -22,7 +22,7 @@ class Spectrogrammer:
         Path(self.dataset_root / "spectrograms").mkdir(parents=True, exist_ok=True)
 
     def transform(self, filename):
-        audio, sr = torchaudio.load(filename)
+        audio, sr = T.load(filename)
         audio = torch.clamp(audio[0], -1.0, 1.0)
 
         if self.cfg.preprocessing.sample_rate != sr:
@@ -40,7 +40,7 @@ class Spectrogrammer:
             "normalized": True,
         }
 
-        mel_spec_transform = T.MelSpectrogram(**mel_args)
+        mel_spec_transform = TT.MelSpectrogram(**mel_args)
 
         with torch.no_grad():
             spectrogram = mel_spec_transform(audio)
@@ -67,7 +67,7 @@ class Spectrogrammer:
             )
 
 
-class AudioLenGainer:
+class AudioLengthsToCSV:
     def __init__(self, cfg):
         self.cfg = cfg.datamodule
         self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.path)
@@ -79,7 +79,7 @@ class AudioLenGainer:
             self.audio_lengths.append(
                 {
                     "path": Path(path).relative_to(get_original_cwd()),
-                    "length": torchaudio.load(path)[0].shape[1],
+                    "length": T.load(path)[0].shape[1],
                 }
             )
         df = pd.DataFrame(self.audio_lengths)

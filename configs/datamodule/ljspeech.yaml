@@ -8,7 +8,7 @@ params:
   audio_len: 100000 # Lengths: min 24477, max:222621, mean:144952 median:149149 So I am not sure what to select here. 
   crop_mel_frames: 62 # Maybe not correct?
   pin_memory: True
-  collator: diffspeak.datasets.collator.ZeroPad
+  collator: diffspeak.datasets.collator.ZeroPadCollator
 
 preprocessing:
   transformer: diffspeak.datasets.utils.Spectrogrammer

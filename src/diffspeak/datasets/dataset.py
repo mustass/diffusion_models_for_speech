@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pandas as pd
 import torch
-import torchaudio
+import torchaudio as T
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
 
@@ -53,7 +53,7 @@ class ConditionalDataset(AudioDataset):
     def __getitem__(self, idx):
         audio_filename = self.filenames.loc[idx]
         spec_filename = f"{self.spectrograms_path / Path(audio_filename).name}.spec.pt"
-        signal, _ = torchaudio.load(audio_filename)
+        signal, _ = T.load(audio_filename)
         spectrogram = torch.load(spec_filename)
         return {"audio": signal[0], "spectrogram": spectrogram.T}
 
@@ -64,7 +64,7 @@ class UnconditionalDataset(AudioDataset):
 
     def __getitem__(self, idx):
         audio_filename = self.filenames.loc[idx]
-        signal, _ = torchaudio.load(audio_filename)
+        signal, _ = T.load(audio_filename)
         return {"audio": signal[0], "spectrogram": None}
 
 
