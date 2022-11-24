@@ -78,7 +78,7 @@ class AudioLengthsToCSV:
         for path in tqdm(filenames):
             self.audio_lengths.append(
                 {
-                    "path": Path(path).relative_to(get_original_cwd()),
+                    "path": path,
                     "length": T.load(path)[0].shape[1],
                 }
             )
