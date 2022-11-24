@@ -12,7 +12,7 @@ model_checkpoint:
   class_name: pytorch_lightning.callbacks.ModelCheckpoint
   params:
     monitor: val_${training.metric}
-    save_top_k: 3
+    save_top_k: 2
     dirpath: saved_models
     filename: '{epoch}-{val_${training.metric}:.6f}'
     mode: ${training.mode}
@@ -27,6 +27,6 @@ other_callbacks:
   - class_name: pytorch_lightning.callbacks.ModelSummary
     params:
       max_depth: 1
-  - class_name:  pytorch_lightning.callbacks.DeviceStatsMonitor
-    params:
+ # - class_name:  pytorch_lightning.callbacks.DeviceStatsMonitor
+ #   params:
   

@@ -4,7 +4,8 @@ from omegaconf import DictConfig
 from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
-from diffspeak.datasets import Collator, lj_speech_from_path
+from diffspeak.datasets import lj_speech_from_path
+from diffspeak.utils.technical_utils import load_obj
 
 
 class LJSpeechDataModule(LightningDataModule):
@@ -21,7 +22,7 @@ class LJSpeechDataModule(LightningDataModule):
         self.val = self.splits[1]
         self.test = self.splits[2]
 
-        self.collator = Collator(self.config)
+        self.collator = load_obj(self.config.datamodule.params.collator)(self.config)
 
     def train_dataloader(self):
         return DataLoader(
