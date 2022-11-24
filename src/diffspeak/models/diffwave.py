@@ -124,7 +124,11 @@ class DiffWave(nn.Module):
         super().__init__()
         self.params = cfg.model.params
         self.input_projection = Conv1d(1, self.params.residual_channels, 1)
-        self.noise_schedule = torch.linspace(1e-4, 0.05, 50)
+        self.noise_schedule = torch.linspace(
+            self.params.training_noise_schedule[0],
+            self.params.training_noise_schedule[1],
+            self.params.training_noise_schedule[2],
+        )
         self.noise_level = torch.cumprod(
             torch.ones_like(self.noise_schedule) - self.noise_schedule, 0
         )
