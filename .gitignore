@@ -107,5 +107,5 @@ outputs/
 
 *.ipynb_checkpoints
 
-.environment_local.sh
-.environment_hpc.sh
+./.environment_local.sh
+./.environment_hpc.sh
