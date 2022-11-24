@@ -24,7 +24,14 @@ It's very important that you load a new-ish python version before running the ge
 module load python3/3.9.11
 ```
 
-2. Run the bash script from the root folder:
+2. Set environment variables:
+```{bash}
+export DATA_PATH_PREFIX=# path to your data
+export WANDB_KEY=#your wandb api key
+export PATH_TO_VENV=#path to your venv
+```
+
+3. Run the bash script from the root folder:
 Adding the correct folders for your data. So `/work3/s210527/dl22/` has to be replaced by your preffered location
 ```{bash}
 ./get_started.sh
