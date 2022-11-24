@@ -27,4 +27,4 @@ else
 fi
 
 echo "#### Downloading the Danish Dataset"
-python3 download_danish_dataset.py
+python3 .scripts/download_danish_dataset.py
