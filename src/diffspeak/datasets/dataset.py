@@ -20,11 +20,18 @@ class AudioDataset(torch.utils.data.Dataset):
 
         self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.datamodule.path)
         self.spectrograms_path = self.dataset_root / "spectrograms"
-        self.filenames = pd.Series(glob(f"{self.dataset_root}/**/*.wav", recursive=True))
-        if self.cfg.datamodule.params.collator == "diffspeak.datasets.collator.DeleteShorts":
+        self.filenames = pd.Series(
+            glob(f"{self.dataset_root}/**/*.wav", recursive=True)
+        )
+        if (
+            self.cfg.datamodule.params.collator
+            == "diffspeak.datasets.collator.DeleteShorts"
+        ):
             assert (self.dataset_root / "audio_lenghts.csv").exists()
             self._filter_file_names()
-        self.filenames = self.filenames.apply(lambda l: Path(get_original_cwd() / Path(l)))
+        self.filenames = self.filenames.apply(
+            lambda l: Path(get_original_cwd() / Path(l))
+        )
         pass
 
     def __len__(self):
@@ -33,7 +40,9 @@ class AudioDataset(torch.utils.data.Dataset):
     def _filter_file_names(self):
         audio_lengths = pd.read_csv(self.dataset_root / "audio_lenghts.csv")
         assert len(audio_lengths) == len(self.filenames)
-        self.filenames = audio_lengths[audio_lengths["length"] >= self.cfg.datamodule.params.audio_len]["path"].reset_index(drop=True)
+        self.filenames = audio_lengths[
+            audio_lengths["length"] >= self.cfg.datamodule.params.audio_len
+        ]["path"].reset_index(drop=True)
         pass
 
 

@@ -48,7 +48,8 @@ class Spectrogrammer:
             spectrogram = torch.clamp((spectrogram + 100) / 100, 0.0, 1.0)
             torch.save(
                 spectrogram.cpu(),
-                f"{self.dataset_root}/spectrograms/{Path(filename).name}.spec.pt", )
+                f"{self.dataset_root}/spectrograms/{Path(filename).name}.spec.pt",
+            )
 
     def create_spectrograms(self):
         filenames = glob(f"{self.dataset_root}/**/*.wav", recursive=True)
@@ -75,6 +76,11 @@ class AudioLenGainer:
     def create_audio_lengths(self):
         filenames = glob(f"{self.dataset_root}/**/*.wav", recursive=True)
         for path in tqdm(filenames):
-            self.audio_lengths.append({'path': Path(path).relative_to(get_original_cwd()), 'length': torchaudio.load(path)[0].shape[1]})
+            self.audio_lengths.append(
+                {
+                    "path": Path(path).relative_to(get_original_cwd()),
+                    "length": torchaudio.load(path)[0].shape[1],
+                }
+            )
         df = pd.DataFrame(self.audio_lengths)
-        df.to_csv(self.dataset_root / 'audio_lenghts.csv', index=False)
+        df.to_csv(self.dataset_root / "audio_lenghts.csv", index=False)
