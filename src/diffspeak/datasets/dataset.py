@@ -28,22 +28,20 @@ class AudioDataset(torch.utils.data.Dataset):
             == "diffspeak.datasets.collator.DeleteShorts"
         ):
             assert (self.dataset_root / "audio_lenghts.csv").exists()
-            self._filter_file_names()
+            self.remove_shorts()
         self.filenames = self.filenames.apply(
             lambda l: Path(get_original_cwd() / Path(l))
         )
-        pass
 
     def __len__(self):
         return len(self.filenames)
 
-    def _filter_file_names(self):
+    def remove_shorts(self):
         audio_lengths = pd.read_csv(self.dataset_root / "audio_lenghts.csv")
         assert len(audio_lengths) == len(self.filenames)
         self.filenames = audio_lengths[
             audio_lengths["length"] >= self.cfg.datamodule.params.audio_len
         ]["path"].reset_index(drop=True)
-        pass
 
 
 class ConditionalDataset(AudioDataset):
