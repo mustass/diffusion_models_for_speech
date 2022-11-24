@@ -23,11 +23,10 @@ class AudioDataset(torch.utils.data.Dataset):
         self.filenames = pd.Series(
             glob(f"{self.dataset_root}/**/*.wav", recursive=True)
         )
-        if (
-            self.cfg.datamodule.params.collator
-            == "diffspeak.datasets.collator.DeleteShorts"
-        ):
-            assert (self.dataset_root / "audio_lenghts.csv").exists()
+        if self.cfg.datamodule.params.remove_shorts:
+            assert (
+                self.dataset_root / "audio_lenghts.csv"
+            ).exists(), "The metadata file audio_lenghts.csv does not exist. Run the preprocessing before proceeding"
             self.remove_shorts()
         self.filenames = self.filenames.apply(
             lambda l: Path(get_original_cwd() / Path(l))
