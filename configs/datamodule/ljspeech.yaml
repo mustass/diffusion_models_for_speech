@@ -9,7 +9,7 @@ params:
   crop_mel_frames: 62 # Maybe not correct?
   pin_memory: True
   remove_shorts: True
-  collator: diffspeak.datasets.collator.ZeroPadCollator
+  collator: diffspeak.datasets.collator.Collator
 
 preprocessing:
   transformer: diffspeak.datasets.utils.Spectrogrammer
