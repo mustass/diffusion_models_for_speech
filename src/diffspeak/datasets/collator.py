@@ -9,7 +9,9 @@ class Collator:
         self.cfg = cfg
 
     def collate(self, minibatch):
-        pass
+        for record in minibatch:
+            subsample(self.cfg, record)
+        return self.assamble(minibatch)
 
     def assamble(self, minibatch):
         audio = torch.stack(
