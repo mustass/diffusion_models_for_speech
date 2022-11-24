@@ -33,6 +33,11 @@ class AudioDataset(torch.utils.data.Dataset):
             ).exists(), "The metadata file audio_lenghts.csv does not exist. Run the preprocessing before proceeding"
 
             self.remove_shorts()
+        else:
+            assert (
+                self.cfg.datamodule.params.collator
+                != "diffspeak.datasets.collator.Collator"
+            ), "The default Collator can not handle too short audio.\nSet remove_shorts = True or use another Collator!"
         self.filenames = self.filenames.apply(
             lambda l: Path(get_original_cwd() / Path(l))
         )
