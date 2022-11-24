@@ -25,7 +25,7 @@ module load python3/3.9.11
 ```
 
 2. Run the bash script from the root folder:
-
+Adding the correct folders for your data. So `/work3/s210527/dl22/` has to be replaced by your preffered location
 ```{bash}
 ./get_started.sh
 ```
@@ -51,7 +51,7 @@ Make sure to run ``make`` in the root directory and push changes before creating
 ### Preprocessing of the LJ dataset
 
 To run conditional training or/and evaluation we need to create spectrograms. This is done by running:
-
+`/work3/s210527/dl22/` has to be replaced by your preffered location
 ```{bash}
 python3 scripts/preprocess.py
 ```
