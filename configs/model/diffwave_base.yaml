@@ -5,5 +5,6 @@ params:
   dilation_cycle_length: 10
   unconditional: ${datamodule.params.unconditional}
   n_mels: ${datamodule.preprocessing.n_mels}
+  training_noise_schedule: [0.0001,0.05,50] # Input to linspace. [from, to, number of samples] 
   inference_noise_schedule: [0.0001, 0.001, 0.01, 0.05, 0.2, 0.5]
-  audio_len: 110250
+  audio_len: ${datamodule.params.audio_len}
