@@ -24,7 +24,7 @@ It's very important that you load a new-ish python version before running the ge
 module load python3/3.9.11
 ```
 
-2. Set environment variables:
+2. Set environment variables (!!):
 ```{bash}
 export DATA_PATH_PREFIX=# path to your data
 export WANDB_KEY=#your wandb api key
@@ -32,7 +32,6 @@ export PATH_TO_VENV=#path to your venv
 ```
 
 3. Run the bash script from the root folder:
-Adding the correct folders for your data. So `/work3/s210527/dl22/` has to be replaced by your preffered location
 ```{bash}
 ./get_started.sh
 ```
@@ -57,8 +56,7 @@ Make sure to run ``make`` in the root directory and push changes before creating
 
 ### Preprocessing of the LJ dataset
 
-To run conditional training or/and evaluation we need to create spectrograms. This is done by running:
-`/work3/s210527/dl22/` has to be replaced by your preffered location
+To run conditional training or/and evaluation we need to create spectrograms.
 ```{bash}
 python3 scripts/preprocess.py
 ```
