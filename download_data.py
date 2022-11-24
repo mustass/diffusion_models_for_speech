@@ -1,5 +1,6 @@
 from pathlib import Path
 import wget
+import tarfile
 
 print("#### Checking and creating data folder if it does not exist ####")
 en_path = Path.cwd() / 'data/tj/external'
@@ -12,6 +13,8 @@ dk_path.mkdir(parents=True, exist_ok=True)
 dk_raw_path.mkdir(parents=True, exist_ok=True)
 
 en_tar = en_path / 'LJSpeech-1.1.tar.bz2'
+en_meta = en_raw_path / 'LJSpeech-1.1/metadata.csv'
+
 if en_tar.is_file():
     print("#### LJSpeech Dataset is already there ####")
 else:
@@ -19,8 +22,16 @@ else:
     en_url = 'https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2'
     wget.download(en_url,out = en_path)
 
-dk_tars = ['da.16kHz.0611.tar.gz', 'da.16kHz.0565-1.tar.gz']
+if en_meta.is_file():
+    print("#### LJSpeech Dataset is already extracted ####")
+else:
+    print("#### Extracting LJSpeech data ####")
+    en_file = tarfile.open(en_tar)
+    en_file.extractall(en_raw_path)
+    en_file.close()
 
+dk_tars = ['da.16kHz.0611.tar.gz', 'da.16kHz.0565-1.tar.gz', 'da.16kHz.0565-2.tar.gz']
+dk_extracted_data = ['da_0611_test', 'Stasjon01', 'Stasjon04']
 for i, tar in enumerate(dk_tars):
     tar_path = dk_path / tar
     if tar_path.is_file():
@@ -30,3 +41,11 @@ for i, tar in enumerate(dk_tars):
         dk_url = 'https://www.nb.no/sbfil/talegjenkjenning/16kHz/' + tar
         wget.download(dk_url, str(tar_path))
 
+    dk_extracted_path = dk_raw_path / dk_extracted_data[i]
+    if dk_extracted_path.is_dir():
+        print("#### Danish Dataset part " + str(i+1) + "/3 is already extracted ####")
+    else:
+        print("#### Extracting Danish Dataset " + str(i+1) + "/3 ####")
+        dk_file = tarfile.open(tar_path)
+        dk_file.extractall(dk_raw_path)
+        dk_file.close()  
