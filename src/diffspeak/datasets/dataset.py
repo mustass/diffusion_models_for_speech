@@ -10,25 +10,24 @@ import torch
 import torchaudio as T
 from hydra.utils import get_original_cwd
 from omegaconf import DictConfig
+import os
 
 
 class AudioDataset(torch.utils.data.Dataset):
     def __init__(self, cfg: DictConfig):
         super().__init__()
         self.cfg = cfg
-        self.filenames = []
 
-        self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.datamodule.path)
-        self.spectrograms_path = self.dataset_root / "spectrograms"
-        self.filenames = pd.Series(
-            glob(f"{self.dataset_root}/**/*.wav", recursive=True)
-        )
+        self.data_path_prefix = Path(os.getenv("DATA_PATH_PREFIX"))
+        # self.audio_path = self.data_path_prefix / "raw"
+        # self.spectrograms_path = self.data_path_prefix / "spectrograms"
+
         if self.cfg.datamodule.params.remove_shorts:
             assert (
                 self.dataset_root / "audio_lenghts.csv"
             ).exists(), "The metadata file audio_lenghts.csv does not exist. Run the preprocessing before proceeding"
 
-            self.remove_shorts()
+            self.read_audiolens()
         self.filenames = self.filenames.apply(
             lambda l: Path(get_original_cwd() / Path(l))
         )
@@ -36,12 +35,23 @@ class AudioDataset(torch.utils.data.Dataset):
     def __len__(self):
         return len(self.filenames)
 
-    def remove_shorts(self):
+    def read_audiolens(self):
         audio_lengths = pd.read_csv(self.dataset_root / "audio_lenghts.csv")
         assert len(audio_lengths) == len(self.filenames)
         self.filenames = audio_lengths[
             audio_lengths["length"] >= self.cfg.datamodule.params.audio_len
         ]["path"].reset_index(drop=True)
+    
+    def _get_filenames(self):
+        if self.cfg.datamodule.params.remove_shorts == True:
+            #TODO: This could be moved to config_utils with some considerations
+            assert (
+                self.dataset_root / "audio_lenghts.csv"
+            ).exists(), "The metadata file audio_lenghts.csv does not exist. Run the preprocessing before proceeding"
+            self.read_audiolens()
+        else :
+            filenames_list = glob(f"{self.dataset_root}/**/*.wav", recursive=True)
+
 
 
 class ConditionalDataset(AudioDataset):

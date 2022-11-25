@@ -12,7 +12,7 @@ params:
   collator: diffspeak.datasets.collator.Collator
 
 preprocessing:
-  transformer: diffspeak.datasets.utils.Spectrogrammer
+  transformer: diffspeak.datasets.utils.MachineAnnotator
   subset_frac: 1
   sample_rate: 22050
   n_mels: 80
