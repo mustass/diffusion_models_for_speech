@@ -111,11 +111,18 @@ class MachineAnnotator:
     def get_spec_path_from_audio_path(self, audio_path):
         return self.data_path_prefix / Path(*audio_path.relative_to(self.data_path_prefix).parts[:2]) / "spectrograms" / Path(*audio_path.relative_to(self.data_path_prefix).parts[3:-1]) / Path(audio_path.stem).with_suffix(".pt") 
 
-    def transform(self, spec_path, audio, sr):
+    def get_processed_audio_path(self, audio_path):
+        return self.data_path_prefix / Path(*audio_path.relative_to(self.data_path_prefix).parts[:2]) / "processed" / Path(*audio_path.relative_to(self.data_path_prefix).parts[3:])
+
+    def transform(self, spec_path, processed_wav_path, audio, sr):
         audio = torch.clamp(audio[0], -1.0, 1.0)
 
         if self.cfg.preprocessing.sample_rate != sr:
-            raise ValueError(f"Invalid sample rate {sr}.")
+            audio = T.functional.resample(audio, orig_freq=sr, new_freq=self.cfg.preprocessing.sample_rate)
+            sr = self.cfg.preprocessing.sample_rate
+        
+        processed_wav_path.parent.mkdir(parents=True, exist_ok=True)
+        T.save(processed_wav_path, audio.unsqueeze(dim=1).T, sr)
 
         mel_args = {
             "sample_rate": sr,
@@ -145,7 +152,8 @@ class MachineAnnotator:
         audio_path = Path(audio_path)
         audio, sr = T.load(audio_path)
         spec_path = self.get_spec_path_from_audio_path(audio_path)
-        self.transform(spec_path, audio, sr)
+        processed_wav_path = self.get_processed_audio_path(audio_path)
+        self.transform(spec_path, processed_wav_path, audio, sr)
         language = self.get_language_from_audio_path(audio_path)
         self.annotations.append({
             'audio_path': audio_path,
@@ -173,5 +181,6 @@ class MachineAnnotator:
         """
         for filename in tqdm(filenames):
             self.preprocess_audio_file(filename)
+        
         df = pd.DataFrame(self.annotations)
         df.to_csv(self.data_path_prefix / "data" / "annotations.csv")

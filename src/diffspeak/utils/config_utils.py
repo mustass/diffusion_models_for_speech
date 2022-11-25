@@ -1,4 +1,9 @@
 def sanity_check(cfg):
+    """
+    Check config for training.
+    Do not use this when preprocessing!
+    """
+    
     assert not (
         cfg.datamodule.params.remove_shorts is False
         and cfg.datamodule.params.collator == "diffspeak.datasets.collator.Collator"
@@ -8,3 +13,5 @@ def sanity_check(cfg):
         cfg.datamodule.params.remove_shorts is True
         and cfg.datamodule.params.collator == "diffspeak.datasets.collator.ZeroPadCollator"
     ), "Handling too short audio in the collator is not necessary when remove_shorts = True"
+
+    assert (Path(os.getenv("DATA_PATH_PREFIX")) / "data" / "annotations.csv").exists()

@@ -1,6 +1,6 @@
 datamodule_name: diffspeak.lightning_classes.datamodule.LJSpeechDataModule
 params:
-  datasets: ["tj"]
+  datasets: ["tj", "nst_danish"]
   unconditional: True
   remove_shorts: True
   batch_size: 8

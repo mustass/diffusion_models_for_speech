@@ -17,17 +17,10 @@ class AudioDataset(torch.utils.data.Dataset):
     def __init__(self, cfg: DictConfig):
         super().__init__()
         self.cfg = cfg
-
         self.data_path_prefix = Path(os.getenv("DATA_PATH_PREFIX"))
-        # self.audio_path = self.data_path_prefix / "raw"
-        # self.spectrograms_path = self.data_path_prefix / "spectrograms"
+        
+        self.df = pd.read_csv(str(self.data_path_prefix / "data" / "annotations.csv"))
 
-        if self.cfg.datamodule.params.remove_shorts:
-            assert (
-                self.dataset_root / "audio_lenghts.csv"
-            ).exists(), "The metadata file audio_lenghts.csv does not exist. Run the preprocessing before proceeding"
-
-            self.read_audiolens()
         self.filenames = self.filenames.apply(
             lambda l: Path(get_original_cwd() / Path(l))
         )
