@@ -49,6 +49,7 @@ class Spectrogrammer:
             spectrogram = 20 * torch.log10(torch.clamp(spectrogram, min=1e-5)) - 20
             spectrogram = torch.clamp((spectrogram + 100) / 100, 0.0, 1.0)
             dst_path = str(self.spec_dir / Path(filename).relative_to(self.raw_dir)) + ".spec.pt"
+            Path(dst_path).parent.mkdir(exist_ok=True, parents=True)
             torch.save(
                 spectrogram.cpu(),
                 dst_path,

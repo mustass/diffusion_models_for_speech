@@ -19,7 +19,7 @@ def preprocess(cfg: DictConfig) -> None:
 
     data_path_prefix = Path(os.getenv("DATA_PATH_PREFIX"))
     for dataset_name in cfg.datamodule.params.datasets:
-        root_dir = data_path_prefix / dataset_name
+        root_dir = data_path_prefix / 'data' / dataset_name
         transformer = load_obj(cfg.datamodule.preprocessing.transformer)(cfg, root_dir=root_dir)
         transformer.create_spectrograms()
         audiolengainer = load_obj("diffspeak.datasets.utils.AudioLengthsToCSV")(cfg, root_dir=root_dir)
