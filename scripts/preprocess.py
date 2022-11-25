@@ -1,5 +1,6 @@
 import os
 import warnings
+from pathlib import Path
 
 import hydra
 from omegaconf import DictConfig, OmegaConf
@@ -16,10 +17,13 @@ def preprocess(cfg: DictConfig) -> None:
     audio synthesis.
     """
 
-    transformer = load_obj(cfg.datamodule.preprocessing.transformer)(cfg)
-    transformer.create_spectrograms()
-    audiolengainer = load_obj("diffspeak.datasets.utils.AudioLengthsToCSV")(cfg)
-    audiolengainer.create_audio_lengths()
+    data_path_prefix = Path(os.getenv("DATA_PATH_PREFIX"))
+    for dataset_name in cfg.datamodule.params.datasets:
+        root_dir = data_path_prefix / dataset_name
+        transformer = load_obj(cfg.datamodule.preprocessing.transformer)(cfg, root_dir=root_dir)
+        transformer.create_spectrograms()
+        audiolengainer = load_obj("diffspeak.datasets.utils.AudioLengthsToCSV")(cfg, root_dir=root_dir)
+        audiolengainer.create_audio_lengths()
 
 
 @hydra.main(config_path="../configs", config_name="config")

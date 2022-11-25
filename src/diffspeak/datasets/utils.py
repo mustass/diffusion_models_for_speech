@@ -15,9 +15,11 @@ from tqdm import tqdm
 
 
 class Spectrogrammer:
-    def __init__(self, cfg):
+    def __init__(self, cfg, root_dir):
         self.cfg = cfg.datamodule
-        self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.path)
+        self.dataset_root = Path(root_dir)
+        self.raw_dir = self.dataset_root / "raw"
+        self.spec_dir = self.dataset_root / "spectrograms"
 
         Path(self.dataset_root / "spectrograms").mkdir(parents=True, exist_ok=True)
 
@@ -46,9 +48,10 @@ class Spectrogrammer:
             spectrogram = mel_spec_transform(audio)
             spectrogram = 20 * torch.log10(torch.clamp(spectrogram, min=1e-5)) - 20
             spectrogram = torch.clamp((spectrogram + 100) / 100, 0.0, 1.0)
+            dst_path = str(self.spec_dir / Path(filename).relative_to(self.raw_dir)) + ".spec.pt"
             torch.save(
                 spectrogram.cpu(),
-                f"{self.dataset_root}/spectrograms/{Path(filename).name}.spec.pt",
+                dst_path,
             )
 
     def create_spectrograms(self):
@@ -68,9 +71,9 @@ class Spectrogrammer:
 
 
 class AudioLengthsToCSV:
-    def __init__(self, cfg):
+    def __init__(self, cfg, root_dir):
         self.cfg = cfg.datamodule
-        self.dataset_root = Path(get_original_cwd()).joinpath(self.cfg.path)
+        self.dataset_root = Path(root_dir)
         self.audio_lengths = []
 
     def create_audio_lengths(self):
