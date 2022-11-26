@@ -1,3 +1,5 @@
+from typing import Any
+
 import pytorch_lightning as pl
 import torch
 from omegaconf import DictConfig
@@ -21,8 +23,7 @@ class LitDiffWaveModel(pl.LightningModule):
             }
         )
 
-    def forward(self, x, mask, *args, **kwargs):
-        print(f"Getting {x} for lightning module forward.")
+    def forward(self, x, *args, **kwargs):
         return self.model(x)
 
     def configure_optimizers(self):
@@ -137,3 +138,49 @@ class LitDiffWaveModel(pl.LightningModule):
                 prog_bar=True,
                 logger=True,
             )
+
+    def predict_step(
+        self, batch: Any, batch_idx: int, dataloader_idx: int = 0, inference_noise=None
+    ):
+        spectrogram = batch["spectrogram"]
+        lang = batch["lang"]
+
+        beta = self.model.noise_schedule
+        alpha_train = torch.ones_like(beta) - beta
+        alpha_train_cum = torch.cumprod(alpha_train, 0)
+
+        T = list(range(len(alpha_train_cum)))
+
+        if inference_noise is not None and not all(
+            inference_noise == self.model.noise_shedule
+        ):
+            T = self.adjust_Ts(inference_noise)
+
+        if not self.cfg.model.params.unconditional:
+            if (
+                len(spectrogram.shape) == 2
+            ):  # Expand rank 2 tensors by adding a batch dimension.
+                spectrogram = spectrogram.unsqueeze(0)
+            audio = torch.randn(
+                spectrogram.shape[0],
+                self.cfg.model.params.hop_samples * spectrogram.shape[-1],
+            )
+
+        for n in range(len(alpha_train) - 1, -1, -1):
+            c1 = 1 / alpha_train[n] ** 0.5
+            c2 = beta[n] / (1 - alpha_train_cum[n]) ** 0.5
+            audio = c1 * (
+                audio - c2 * self(audio, torch.tensor([T[n]]), spectrogram).squeeze(1)
+            )
+            if n > 0:
+                noise = torch.randn_like(audio)
+                sigma = (
+                    (1.0 - alpha_train_cum[n - 1])
+                    / (1.0 - alpha_train_cum[n])
+                    * beta[n]
+                ) ** 0.5
+                audio += sigma * noise
+            audio = torch.clamp(audio, -1.0, 1.0)
+
+    def adjust_Ts(self, inference_noise):
+        pass
