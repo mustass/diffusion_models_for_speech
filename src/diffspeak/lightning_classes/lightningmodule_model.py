@@ -48,7 +48,9 @@ class LitDiffWaveModel(pl.LightningModule):
                 spectrogram.shape[0],
                 self.cfg.model.params.hop_samples * spectrogram.shape[-1],
             )
-
+        else:
+            audio = torch.randn(1, self.cfg.datamodule.params.audio_len)
+        
         for n in range(len(alpha_train) - 1, -1, -1):
             c1 = 1 / alpha_train[n] ** 0.5
             c2 = beta[n] / (1 - alpha_train_cum[n]) ** 0.5

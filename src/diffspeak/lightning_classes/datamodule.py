@@ -47,7 +47,7 @@ class LJSpeechDataModule(LightningDataModule):
         return DataLoader(
             self.test,
             collate_fn=self.collator.collate,
-            batch_size=self.config.datamodule.params.batch_size,
+            batch_size=self.config.datamodule.params.batch_size, # Needs to be 1 maybe?
             num_workers=self.config.datamodule.params.num_workers,
             pin_memory=self.config.datamodule.params.pin_memory,
         )
