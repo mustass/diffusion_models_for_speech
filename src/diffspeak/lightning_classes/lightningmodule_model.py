@@ -32,7 +32,7 @@ class LitDiffWaveModel(pl.LightningModule):
         alpha_train = torch.ones_like(beta) - beta
         alpha_train_cum = torch.cumprod(alpha_train, 0)
 
-        T = list(range(len(alpha_train_cum)))
+        T = torch.tensor(list(range(len(alpha_train_cum))))
 
         if self.cfg.inference_noise is not None and not all(
             self.cfg.inference_noise == self.model.noise_shedule
@@ -185,5 +185,14 @@ class LitDiffWaveModel(pl.LightningModule):
     ):
         return self(batch)
 
-    def adjust_Ts(self, inference_noise):
-        pass
+    def adjust_Ts(self):
+        T = []
+        for s in range(len(self.cfg.model.params.inference_noise_schedule)):
+            for t in range(len(self.cfg.model.params.training_noise_schedule) - 1):
+                if talpha_cum[t + 1] <= alpha_cum[s] <= talpha_cum[t]:
+                    twiddle = (talpha_cum[t] ** 0.5 - alpha_cum[s] ** 0.5) / (
+                        talpha_cum[t] ** 0.5 - talpha_cum[t + 1] ** 0.5
+                    )
+                    T.append(t + twiddle)
+                    break
+        return torch.tensor(T)
