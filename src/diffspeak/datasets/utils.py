@@ -150,18 +150,22 @@ class MachineAnnotator:
 
     def preprocess_audio_file(self, audio_path):
         audio_path = Path(audio_path)
-        audio, sr = T.load(audio_path)
+        try:
+            audio, sr = T.load(audio_path)
+        except Exception as e:
+            print(e)
+            return
+
         spec_path = self.get_spec_path_from_audio_path(audio_path)
         processed_wav_path = self.get_processed_audio_path(audio_path)
         self.transform(spec_path, processed_wav_path, audio, sr)
         language = self.get_language_from_audio_path(audio_path)
         self.annotations.append({
-            'audio_path': audio_path,
+            'audio_path': processed_wav_path,
             'spectrogram_path': spec_path,
             'audio_len': audio.shape[1],
             'language': language,
         })
-        pass
 
     def preprocess_audio_files(self):
         filenames = self.audio_paths

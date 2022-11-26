@@ -1,9 +1,13 @@
+import os
+from pathlib import Path
+
+
 def sanity_check(cfg):
     """
     Check config for training.
     Do not use this when preprocessing!
     """
-    
+
     assert not (
         cfg.datamodule.params.remove_shorts is False
         and cfg.datamodule.params.collator == "diffspeak.datasets.collator.Collator"
