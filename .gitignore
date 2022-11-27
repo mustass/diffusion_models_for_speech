@@ -102,7 +102,9 @@ cookiecutter-pypackage-env/
 .vscode/
 
 
-data/
+data/*
+!data/annotations.csv
+data/*/**
 outputs/
 
 *.ipynb_checkpoints
