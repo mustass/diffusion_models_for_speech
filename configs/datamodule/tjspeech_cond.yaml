@@ -1,0 +1,22 @@
+datamodule_name: diffspeak.lightning_classes.datamodule.LJSpeechDataModule
+path_to_metadata: data
+params:
+  datasets: ["tj"]
+  unconditional: False
+  remove_shorts: False
+  batch_size: 8
+  split: [0.9,0.05,0.05]
+  num_workers: 4
+  audio_len: 110000 # Lengths: min 24477, max:222621, mean:144952 median:149149 So I am not sure what to select here. 
+  crop_mel_frames: 62 # Maybe not correct?
+  pin_memory: True
+  collator: diffspeak.datasets.collator.ZeroPadCollator
+
+preprocessing:
+  transformer: diffspeak.datasets.utils.Preprocessor
+  split_for_conditional_inference: [0.99, 0.01]
+  subset_frac: 1
+  sample_rate: 22050
+  n_mels: 80
+  n_fft: 1024
+  hop_samples: 256
