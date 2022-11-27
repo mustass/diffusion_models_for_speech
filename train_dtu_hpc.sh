@@ -14,4 +14,4 @@ source $PATH_TO_VENV/bin/activate
 
 wandb login $WANDB_KEY
 echo "Running script..."
-python3 ./scripts/train.py datamodule.path=$DATA_PATH_PREFIX/data/tj/raw/LJSpeech-1.1/ datamodule.params.batch_size=8 trainer.gpus=1 trainer.accelerator=gpu 
+python3 ./scripts/train.py datamodule.path_to_metadata=$DATA_PATH_PREFIX datamodule.params.batch_size=8 trainer.gpus=1 trainer.accelerator=gpu 

@@ -1,7 +1,6 @@
 # Inspired by
 # https://github.com/lmnt-com/diffwave/blob/master/src/diffwave/dataset.py
 # ==============================================================================
-import os
 from pathlib import Path
 
 import pandas as pd

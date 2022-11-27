@@ -3,7 +3,6 @@
 # ==============================================================================
 
 import os
-from concurrent.futures import ProcessPoolExecutor
 from glob import glob
 from pathlib import Path
 
@@ -12,11 +11,10 @@ import scipy
 import torch
 import torchaudio as T
 import torchaudio.transforms as TT
-from hydra.utils import get_original_cwd
 from tqdm import tqdm
 
 
-class MachineAnnotator:
+class Preprocessor:
     def __init__(self, cfg):
         self.cfg = cfg.datamodule
         self.data_path_prefix = Path(os.getenv("DATA_PATH_PREFIX"))
@@ -114,16 +112,7 @@ class MachineAnnotator:
             filenames = filenames[
                 0 : int(len(filenames) * self.cfg.preprocessing.subset_frac)
             ]
-        """
-        with ProcessPoolExecutor() as executor:
-            list(
-                tqdm(
-                    executor.map(self.preprocess_audio_file, filenames),
-                    desc="Preprocessing",
-                    total=len(filenames),
-                )
-            )
-        """
+
         for filename in tqdm(filenames):
             self.preprocess_audio_file(filename)
 
