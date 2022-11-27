@@ -13,18 +13,22 @@ class LJSpeechDataModule(LightningDataModule):
         super().__init__()
         self.config = cfg
 
-    def setup(self, stage: Optional[str] = None):
+    def setup(self, inference: Optional[bool] = False):
         # called on every GPU
-        self.dataset = lj_speech_from_path(self.config)
-        self.splits = random_split(self.dataset, self.config.datamodule.params.split)
-
-        self.train = self.splits[0]
-        self.val = self.splits[1]
-        self.test = self.splits[2]
+        self.inference = inference
+        self.dataset = lj_speech_from_path(self.config,inference)
+        if not inference:
+            self.splits = random_split(self.dataset, self.config.datamodule.params.split)
+            self.train = self.splits[0]
+            self.val = self.splits[1]
+            self.test = self.splits[2]
+        else:
+            self.test = self.dataset
 
         self.collator = load_obj(self.config.datamodule.params.collator)(self.config)
 
     def train_dataloader(self):
+        assert not self.inference, "In inference mode, there is no train_dataloader."
         return DataLoader(
             self.train,
             collate_fn=self.collator.collate,
@@ -35,6 +39,7 @@ class LJSpeechDataModule(LightningDataModule):
         )
 
     def val_dataloader(self):
+        assert not self.inference, "In inference mode, there is no val_dataloader."
         return DataLoader(
             self.val,
             collate_fn=self.collator.collate,
