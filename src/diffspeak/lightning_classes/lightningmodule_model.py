@@ -97,7 +97,7 @@ class LitDiffWaveModel(pl.LightningModule):
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
         noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
-        noise_scale_sqrt = noise_scale**0.5
+        noise_scale_sqrt = noise_scale ** 0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
 
@@ -130,7 +130,7 @@ class LitDiffWaveModel(pl.LightningModule):
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
         noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
-        noise_scale_sqrt = noise_scale**0.5
+        noise_scale_sqrt = noise_scale ** 0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
 
@@ -160,7 +160,7 @@ class LitDiffWaveModel(pl.LightningModule):
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
         noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
-        noise_scale_sqrt = noise_scale**0.5
+        noise_scale_sqrt = noise_scale ** 0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
 

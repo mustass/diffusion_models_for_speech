@@ -43,17 +43,6 @@ class ZeroPadCollator(Collator):
         return self.assamble(minibatch)
 
 
-def delete_shorts(cfg, record):
-    if cfg.datamodule.params.unconditional:
-        if len(record["audio"]) < cfg.datamodule.params.audio_len:
-            del record["spectrogram"]
-            del record["audio"]
-    else:
-        if len(record["spectrogram"]) < cfg.datamodule.params.crop_mel_frames:
-            del record["spectrogram"]
-            del record["audio"]
-
-
 def zero_pad(cfg, record):
     if cfg.datamodule.params.unconditional:
         if len(record["audio"]) < cfg.datamodule.params.audio_len:
@@ -94,8 +83,7 @@ def subsample(cfg, record):
     else:
         samples_per_frame = cfg.datamodule.preprocessing.hop_samples
         start = random.randint(
-            0,
-            record["spectrogram"].shape[0] - cfg.datamodule.params.crop_mel_frames,
+            0, record["spectrogram"].shape[0] - cfg.datamodule.params.crop_mel_frames,
         )
         end = start + cfg.datamodule.params.crop_mel_frames
         record["spectrogram"] = record["spectrogram"][start:end]

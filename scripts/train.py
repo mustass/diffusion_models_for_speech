@@ -8,6 +8,7 @@ import torch
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
+from diffspeak.utils.config_utils import sanity_check
 from diffspeak.utils.technical_utils import load_obj
 from diffspeak.utils.utils import save_useful_info, set_seed
 
@@ -46,11 +47,7 @@ def run(cfg: DictConfig) -> None:
     callbacks.append(EarlyStopping(**cfg.callbacks.early_stopping.params))
     callbacks.append(ModelCheckpoint(**cfg.callbacks.model_checkpoint.params))
 
-    trainer = pl.Trainer(
-        logger=loggers,
-        callbacks=callbacks,
-        **cfg.trainer,
-    )
+    trainer = pl.Trainer(logger=loggers, callbacks=callbacks, **cfg.trainer,)
 
     dm = load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
     dm.setup()
@@ -77,6 +74,7 @@ def run(cfg: DictConfig) -> None:
 
 @hydra.main(config_path="../configs", config_name="config")
 def run_model(cfg: DictConfig) -> None:
+    sanity_check(cfg)
     os.makedirs("logs", exist_ok=True)
     print(OmegaConf.to_yaml(cfg))
     if cfg.general.log_code:

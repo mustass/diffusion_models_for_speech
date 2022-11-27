@@ -1,18 +1,20 @@
 datamodule_name: diffspeak.lightning_classes.datamodule.LJSpeechDataModule
-path: ./data/tj/raw/LJSpeech-1.1/ # This will fail when our data is on a scratch folder
+path_to_metadata: data
 params:
+  datasets: ["tj", "nst_danish"]
   unconditional: True
+  remove_shorts: False
   batch_size: 8
   split: [0.9,0.05,0.05]
+  split_for_conditional_inference: [0.99, 0.01]
   num_workers: 4
-  audio_len: 100000 # Lengths: min 24477, max:222621, mean:144952 median:149149 So I am not sure what to select here. 
+  audio_len: 110000 # Lengths: min 24477, max:222621, mean:144952 median:149149 So I am not sure what to select here. 
   crop_mel_frames: 62 # Maybe not correct?
   pin_memory: True
-  remove_shorts: True
-  collator: diffspeak.datasets.collator.Collator
+  collator: diffspeak.datasets.collator.ZeroPadCollator
 
 preprocessing:
-  transformer: diffspeak.datasets.utils.Spectrogrammer
+  transformer: diffspeak.datasets.utils.Preprocessor
   subset_frac: 1
   sample_rate: 22050
   n_mels: 80
