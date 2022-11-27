@@ -6,7 +6,7 @@ defaults:
   - inference: basic
   - logging: wandb
   - loss: L1loss
-  - metric: snr
+  - metric: mae
   - model: diffwave_base
   - optimizer: adam
   - scheduler: linearwithwarmup
