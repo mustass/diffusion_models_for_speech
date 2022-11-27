@@ -6,7 +6,7 @@ from concurrent.futures import ProcessPoolExecutor
 from glob import glob
 from pathlib import Path
 import os
-import pandas as pd
+import scipy
 
 import pandas as pd
 import torch
@@ -187,4 +187,13 @@ class MachineAnnotator:
             self.preprocess_audio_file(filename)
         
         df = pd.DataFrame(self.annotations)
+        df = self.split(df, self.cfg.datamodule.params.split_for_conditional_inference)
         df.to_csv(self.data_path_prefix / "data" / "annotations.csv")
+    
+    @staticmethod
+    def split(df, split_sizes = [0.99, 0.01]):
+        assert sum(split_sizes.copy()) == 1, "Split sizes must add up to 1."
+        x = scipy.stats.multinomial(1, split_sizes)
+        sample = x.rvs(len(df))
+        df['split'] = sample.argmax(axis=1)
+        return df
