@@ -2,8 +2,8 @@ from typing import Any
 
 import pytorch_lightning as pl
 import torch
-from tqdm import tqdm
 from omegaconf import DictConfig
+from tqdm import tqdm
 
 from diffspeak.utils.technical_utils import load_obj
 
@@ -26,7 +26,7 @@ class LitDiffWaveModel(pl.LightningModule):
 
     def forward(self, x, *args, **kwargs):
         spectrogram = x["spectrogram"]
-        #lang = x["lang"] TODO in the future
+        # lang = x["lang"] TODO in the future
 
         beta = self.model.noise_schedule
         alpha = torch.ones_like(beta) - beta
@@ -34,7 +34,11 @@ class LitDiffWaveModel(pl.LightningModule):
 
         T = torch.tensor(list(range(len(alpha_cum))))
 
-        if self.cfg.model.params.inference_noise_schedule is not None and not self.cfg.model.params.inference_noise_schedule == self.model.noise_schedule:
+        if (
+            self.cfg.model.params.inference_noise_schedule is not None
+            and not self.cfg.model.params.inference_noise_schedule
+            == self.model.noise_schedule
+        ):
             T, beta, alpha, alpha_cum = self.adjust_Ts(alpha_cum)
 
         if not self.cfg.model.params.unconditional:
@@ -48,20 +52,19 @@ class LitDiffWaveModel(pl.LightningModule):
             )
         else:
             audio = torch.randn(1, self.cfg.datamodule.params.audio_len)
-        
-        for n in (pbar := tqdm(range(len(alpha) - 1, -1, -1))):
+
+        for n in (pbar := tqdm(range(len(alpha) - 1, -1, -1))) :
             pbar.set_description(f"Denoising step {n}")
             c1 = 1 / alpha[n] ** 0.5
             c2 = beta[n] / (1 - alpha_cum[n]) ** 0.5
             audio = c1 * (
-                audio - c2 * self.model(audio, torch.tensor([T[n]]), spectrogram).squeeze(1)
+                audio
+                - c2 * self.model(audio, torch.tensor([T[n]]), spectrogram).squeeze(1)
             )
             if n > 0:
                 noise = torch.randn_like(audio)
                 sigma = (
-                    (1.0 - alpha_cum[n - 1])
-                    / (1.0 - alpha_cum[n])
-                    * beta[n]
+                    (1.0 - alpha_cum[n - 1]) / (1.0 - alpha_cum[n]) * beta[n]
                 ) ** 0.5
                 audio += sigma * noise
             audio = torch.clamp(audio, -1.0, 1.0)
@@ -186,11 +189,11 @@ class LitDiffWaveModel(pl.LightningModule):
     ):
         return self(batch)
 
-    def adjust_Ts(self,alpha_train_cum):
+    def adjust_Ts(self, alpha_train_cum):
         beta = torch.tensor(self.cfg.model.params.inference_noise_schedule)
         alpha = torch.ones_like(beta) - beta
-        alpha_cum = torch.cumprod(alpha,0)
-        
+        alpha_cum = torch.cumprod(alpha, 0)
+
         T = []
         for s in range(len(self.cfg.model.params.inference_noise_schedule)):
             for t in range(len(self.model.noise_schedule) - 1):

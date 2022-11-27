@@ -117,7 +117,9 @@ class Preprocessor:
             self.preprocess_audio_file(filename)
 
         df = pd.DataFrame(self.annotations)
-        df = self.split(df, self.cfg.datamodule.preprocessing.split_for_conditional_inference)
+        df = self.split(
+            df, self.cfg.datamodule.preprocessing.split_for_conditional_inference
+        )
         df.to_csv(self.data_path_prefix / "data" / "annotations.csv")
 
     @staticmethod

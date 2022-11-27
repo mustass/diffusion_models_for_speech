@@ -11,7 +11,7 @@ from omegaconf import DictConfig
 
 
 class AudioDataset(torch.utils.data.Dataset):
-    def __init__(self, cfg: DictConfig, inference:bool = False):
+    def __init__(self, cfg: DictConfig, inference: bool = False):
         super().__init__()
         self.cfg = cfg
         self.df = pd.read_csv(
@@ -31,7 +31,7 @@ class AudioDataset(torch.utils.data.Dataset):
 
 
 class ConditionalDataset(AudioDataset):
-    def __init__(self, cfg: DictConfig, inference = False):
+    def __init__(self, cfg: DictConfig, inference=False):
         super().__init__(cfg, inference)
 
     def __getitem__(self, idx):
@@ -43,8 +43,8 @@ class ConditionalDataset(AudioDataset):
 
 
 class UnconditionalDataset(AudioDataset):
-    def __init__(self, cfg, inference:bool = False):
-        super().__init__(cfg,inference)
+    def __init__(self, cfg, inference: bool = False):
+        super().__init__(cfg, inference)
 
     def __getitem__(self, idx):
         audio_filename = self.df.iloc[idx]["audio_path"]
@@ -52,9 +52,9 @@ class UnconditionalDataset(AudioDataset):
         return {"audio": audio, "spectrogram": None, "filename": audio_filename}
 
 
-def lj_speech_from_path(cfg, inference = False):
+def lj_speech_from_path(cfg, inference=False):
     if cfg.datamodule.params.unconditional:
-        dataset = UnconditionalDataset(cfg,inference)
+        dataset = UnconditionalDataset(cfg, inference)
     else:  # with spectrograms
-        dataset = ConditionalDataset(cfg,inference)
+        dataset = ConditionalDataset(cfg, inference)
     return dataset
