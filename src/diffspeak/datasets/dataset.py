@@ -11,13 +11,14 @@ from omegaconf import DictConfig
 
 
 class AudioDataset(torch.utils.data.Dataset):
-    def __init__(self, cfg: DictConfig):
+    def __init__(self, cfg: DictConfig, inference: bool = False):
         super().__init__()
         self.cfg = cfg
         self.df = pd.read_csv(
             str(Path(get_original_cwd()) / "data" / "annotations.csv")
         )
-        self.df = self.df[self.df["split"] == 0]
+
+        self.df = self.df[self.df["split"] == int(inference)]
         if self.cfg.datamodule.params.remove_shorts:
             # TODO: conditional case?
             self.df = self.df[
@@ -30,30 +31,30 @@ class AudioDataset(torch.utils.data.Dataset):
 
 
 class ConditionalDataset(AudioDataset):
-    def __init__(self, cfg: DictConfig):
-        super().__init__(cfg)
+    def __init__(self, cfg: DictConfig, inference=False):
+        super().__init__(cfg, inference)
 
     def __getitem__(self, idx):
         audio_filename = self.df.iloc[idx]["audio_path"]
         spec_filename = self.df.iloc[idx]["spectrogram_path"]
         audio = T.load(audio_filename)[0][0]
         spectrogram = torch.load(spec_filename).T
-        return {"audio": audio, "spectrogram": spectrogram}
+        return {"audio": audio, "spectrogram": spectrogram, "filename": audio_filename}
 
 
 class UnconditionalDataset(AudioDataset):
-    def __init__(self, cfg):
-        super().__init__(cfg)
+    def __init__(self, cfg, inference: bool = False):
+        super().__init__(cfg, inference)
 
     def __getitem__(self, idx):
         audio_filename = self.df.iloc[idx]["audio_path"]
         audio = T.load(audio_filename)[0][0]
-        return {"audio": audio, "spectrogram": None}
+        return {"audio": audio, "spectrogram": None, "filename": audio_filename}
 
 
-def lj_speech_from_path(cfg):
+def lj_speech_from_path(cfg, inference=False):
     if cfg.datamodule.params.unconditional:
-        dataset = UnconditionalDataset(cfg)
+        dataset = UnconditionalDataset(cfg, inference)
     else:  # with spectrograms
-        dataset = ConditionalDataset(cfg)
+        dataset = ConditionalDataset(cfg, inference)
     return dataset
