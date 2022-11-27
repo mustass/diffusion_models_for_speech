@@ -69,7 +69,7 @@ def zero_pad(cfg, record):
 def subsample(cfg, record):
     if cfg.datamodule.params.unconditional:
         start = random.randint(
-            0, record["audio"].shape[-1] - cfg.datamodule.params.audio_len
+            0, max(record["audio"].shape[-1] - cfg.datamodule.params.audio_len)
         )
         end = start + cfg.datamodule.params.audio_len
         record["audio"] = torch.squeeze(record["audio"][start:end])
@@ -83,7 +83,7 @@ def subsample(cfg, record):
     else:
         samples_per_frame = cfg.datamodule.preprocessing.hop_samples
         start = random.randint(
-            0, record["spectrogram"].shape[0] - cfg.datamodule.params.crop_mel_frames,
+            0, max(0,record["spectrogram"].shape[0] - cfg.datamodule.params.crop_mel_frames),
         )
         end = start + cfg.datamodule.params.crop_mel_frames
         record["spectrogram"] = record["spectrogram"][start:end]
