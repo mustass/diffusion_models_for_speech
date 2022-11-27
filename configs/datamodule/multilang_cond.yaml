@@ -1,5 +1,5 @@
 datamodule_name: diffspeak.lightning_classes.datamodule.LJSpeechDataModule
-path_to_metadata: data
+path_to_metadata: ./data
 params:
   datasets: ["tj", "nst_danish"]
   unconditional: False
