@@ -13,7 +13,7 @@ class LJSpeechDataModule(LightningDataModule):
         super().__init__()
         self.config = cfg
 
-    def setup(self, stage:Optional[str]=None, inference: Optional[bool] = False):
+    def setup(self, stage: Optional[str] = None, inference: Optional[bool] = False):
         # called on every GPU
         self.inference = inference
         self.dataset = lj_speech_from_path(self.config, inference)
