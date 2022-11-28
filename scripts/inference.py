@@ -27,9 +27,7 @@ def synthesize_audio(cfg: DictConfig) -> None:
     save_path.mkdir(parents=True, exist_ok=True)
     set_seed(cfg.training.seed)
 
-    cfg.datamodule.path_to_metadata = '/zhome/ef/8/160495/DL2022/diffusion_for_speech/data'
     cfg.model.params.hop_samples = 256 # SUPER DIRTY
-    model_name = 'outputs/pretrained_model/saved_models/checkpoint_pl.ckpt'
 
     if not args.run_name == 'pretrained_model':
         model_names = glob.glob(
@@ -37,7 +35,8 @@ def synthesize_audio(cfg: DictConfig) -> None:
         )  # TODO later we pick the best
         print(f"### Found these models: {model_names}, will use {model_names[1]}")
         model_name = model_names[1]
-
+    else:
+        model_name = cfg.inference.model_path
 
     dataloader = None
     
@@ -79,18 +78,18 @@ if __name__ == "__main__":
     parser.add_argument(
         "--run_name", help="folder_name", type=str, default="2022-11-24_18-59-52"
     )
+    parser.add_argument(
+        "--meta_data", help="meta_data_folder", type=str, default="./data"
+    )
 
     args = parser.parse_args()
 
     hydra.initialize(config_path="../configs")
 
-<<<<<<< HEAD
-    inference_cfg = hydra.compose(config_name="config")
-=======
-    cfg = compose(config_name="config_pretrained")
->>>>>>> 4c60912 (add pretrained support)
+    cfg = hydra.compose(config_name="config_pretrained")
 
     cfg["inference"]["run_name"] = args.run_name
+    cfg.datamodule.path_to_metadata = args.meta_data
 
     print(cfg.inference.run_name)
 
