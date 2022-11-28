@@ -106,5 +106,5 @@ data/*
 !data/annotations.csv
 data/*/**
 outputs/
-
+!outputs/pretrained_model
 *.ipynb_checkpoints
