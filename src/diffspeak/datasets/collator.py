@@ -80,13 +80,16 @@ def subsample(cfg, record):
             value=0,
         )
 
-    else:
+    else:   
         samples_per_frame = cfg.datamodule.preprocessing.hop_samples
         start = random.randint(
             0, max(0,record["spectrogram"].shape[0] - cfg.datamodule.params.crop_mel_frames),
         )
         end = start + cfg.datamodule.params.crop_mel_frames
-        record["spectrogram"] = record["spectrogram"][start:end]
+
+        
+        record["spectrogram"] = record["spectrogram"][start:end].T
+        
         start *= samples_per_frame
         end *= samples_per_frame
         record["audio"] = torch.squeeze(record["audio"][start:end])

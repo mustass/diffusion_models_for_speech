@@ -68,9 +68,11 @@ def synthesize_audio(cfg: DictConfig) -> None:
             for i, batch in tqdm(enumerate(dataloader)):
                 print(batch.keys())
                 audio = lit_model(batch)
-                filename = 'sound' #Path(batch["filename"]).stem # This does not work because Collator does not pass it on. 
-                path = save_path / f"synthesized_{filename}.wav"
-                T.save(path, audio, cfg.datamodule.preprocessing.sample_rate)
+                
+                for wav in range(audio.shape[0]):
+                    filename = f'sound_batch_{i}_wav_{wav}' #Path(batch["filename"]).stem # This does not work because Collator does not pass it on. 
+                    path = save_path / f"synthesized_{filename}.wav"
+                    T.save(path, audio, cfg.datamodule.preprocessing.sample_rate)
 
 
 if __name__ == "__main__":
