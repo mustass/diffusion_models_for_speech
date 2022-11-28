@@ -1,11 +1,11 @@
+from pathlib import Path
 from typing import Any
 
 import pytorch_lightning as pl
 import torch
+import torchaudio as T
 from omegaconf import DictConfig
 from tqdm import tqdm
-import torchaudio as T
-from pathlib import Path
 
 from diffspeak.utils.technical_utils import load_obj
 
@@ -53,16 +53,21 @@ class LitDiffWaveModel(pl.LightningModule):
                 self.cfg.model.params.hop_samples * spectrogram.shape[-1],
             ).to(spectrogram)
         else:
-            audio = torch.randn(1, spectrogram.shape[1] * self.cfg.datamodule.preprocessing.hop_samples).to(spectrogram)
+            audio = torch.randn(
+                1, spectrogram.shape[1] * self.cfg.datamodule.preprocessing.hop_samples
+            ).to(spectrogram)
 
-        #for n in (pbar := tqdm(range(len(alpha) - 1, -1, -1))) :
-            #pbar.set_description(f"Denoising step {n}")
+        # for n in (pbar := tqdm(range(len(alpha) - 1, -1, -1))) :
+        # pbar.set_description(f"Denoising step {n}")
         for n in range(len(alpha) - 1, -1, -1):
             c1 = 1 / alpha[n] ** 0.5
             c2 = beta[n] / (1 - alpha_cum[n]) ** 0.5
             audio = c1 * (
                 audio
-                - c2 * self.model(audio, torch.tensor([T[n]]).to(spectrogram), spectrogram).squeeze(1)
+                - c2
+                * self.model(
+                    audio, torch.tensor([T[n]]).to(spectrogram), spectrogram
+                ).squeeze(1)
             )
             if n > 0:
                 noise = torch.randn_like(audio)
@@ -102,7 +107,7 @@ class LitDiffWaveModel(pl.LightningModule):
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
         noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
-        noise_scale_sqrt = noise_scale ** 0.5
+        noise_scale_sqrt = noise_scale**0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
 
@@ -135,7 +140,7 @@ class LitDiffWaveModel(pl.LightningModule):
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
         noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
-        noise_scale_sqrt = noise_scale ** 0.5
+        noise_scale_sqrt = noise_scale**0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
 
@@ -165,7 +170,7 @@ class LitDiffWaveModel(pl.LightningModule):
 
         t = torch.randint(0, len(self.model.noise_schedule), [N])
         noise_scale = self.model.noise_level[t].unsqueeze(1).to(audio)
-        noise_scale_sqrt = noise_scale ** 0.5
+        noise_scale_sqrt = noise_scale**0.5
         noise = torch.randn_like(audio)
         noisy_audio = noise_scale_sqrt * audio + (1.0 - noise_scale) ** 0.5 * noise
 
@@ -188,17 +193,20 @@ class LitDiffWaveModel(pl.LightningModule):
             )
 
     def predict_step(
-        self, batch: Any, batch_idx: int, dataloader_idx: int = 0,
+        self,
+        batch: Any,
+        batch_idx: int,
+        dataloader_idx: int = 0,
     ):
         audio = self(batch)
         print(f"Output is of shape: {audio.shape}")
         for wav in range(audio.shape[0]):
             filename = Path(batch["filename"][wav]).stem
             path = Path(self.cfg.inference.audio_path) / f"synthesized_{filename}.wav"
-            T.save(path, audio.to('cpu'), self.cfg.datamodule.preprocessing.sample_rate)
-        
-        #TODO Here we could actually just run the metric thing with the orginal audio
-        
+            T.save(path, audio.to("cpu"), self.cfg.datamodule.preprocessing.sample_rate)
+
+        # TODO Here we could actually just run the metric thing with the orginal audio
+
         return audio
 
     def adjust_Ts(self, alpha_train_cum):

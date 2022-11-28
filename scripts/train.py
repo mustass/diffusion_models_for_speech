@@ -3,9 +3,9 @@ import warnings
 from pathlib import Path
 
 import hydra
-from hydra.utils import get_original_cwd 
 import pytorch_lightning as pl
 import torch
+from hydra.utils import get_original_cwd
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning.callbacks import EarlyStopping, ModelCheckpoint
 
@@ -48,11 +48,17 @@ def run(cfg: DictConfig) -> None:
     callbacks.append(EarlyStopping(**cfg.callbacks.early_stopping.params))
     callbacks.append(ModelCheckpoint(**cfg.callbacks.model_checkpoint.params))
 
-    trainer = pl.Trainer(logger=loggers, callbacks=callbacks, **cfg.trainer,)
+    trainer = pl.Trainer(
+        logger=loggers,
+        callbacks=callbacks,
+        **cfg.trainer,
+    )
 
-    cfg.datamodule.path_to_metadata = Path(get_original_cwd()) / cfg.datamodule.path_to_metadata # Could also just give absolute paths 
+    cfg.datamodule.path_to_metadata = (
+        Path(get_original_cwd()) / cfg.datamodule.path_to_metadata
+    )  # Could also just give absolute paths
     sanity_check(cfg)
-    
+
     dm = load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
     dm.setup()
 

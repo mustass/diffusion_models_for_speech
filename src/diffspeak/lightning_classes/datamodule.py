@@ -5,8 +5,8 @@ from pytorch_lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split
 
 from diffspeak.datasets import lj_speech_from_path
-from diffspeak.utils.technical_utils import load_obj
 from diffspeak.datasets.collator import InferenceCollator
+from diffspeak.utils.technical_utils import load_obj
 
 
 class LJSpeechDataModule(LightningDataModule):
@@ -18,7 +18,7 @@ class LJSpeechDataModule(LightningDataModule):
         # called on every GPU
         self.inference = inference
         self.dataset = lj_speech_from_path(self.config, inference)
-        
+
         if not inference:
             self.splits = random_split(
                 self.dataset, self.config.datamodule.params.split
@@ -31,7 +31,6 @@ class LJSpeechDataModule(LightningDataModule):
             self.inference_collator = InferenceCollator(self.config)
 
         self.collator = load_obj(self.config.datamodule.params.collator)(self.config)
-        
 
     def train_dataloader(self):
         assert not self.inference, "In inference mode, there is no train_dataloader."

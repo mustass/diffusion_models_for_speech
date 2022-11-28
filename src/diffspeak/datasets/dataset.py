@@ -15,10 +15,7 @@ class AudioDataset(torch.utils.data.Dataset):
         super().__init__()
         self.cfg = cfg
         self.df = pd.read_csv(
-            str(
-                Path(cfg.datamodule.path_to_metadata)
-                / "annotations.csv"
-            )
+            str(Path(cfg.datamodule.path_to_metadata) / "annotations.csv")
         )
 
         self.df = self.df[self.df["split"] == int(inference)]

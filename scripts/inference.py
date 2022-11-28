@@ -1,15 +1,15 @@
 import argparse
 import glob
+import os
 from pathlib import Path
 
+import hydra
+import pytorch_lightning as pl
 import torch
 import torchaudio as T
 import yaml
-import hydra
 from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
-import pytorch_lightning as pl
-import os
 
 from diffspeak.utils.technical_utils import load_obj
 from diffspeak.utils.utils import set_seed
@@ -29,9 +29,9 @@ def synthesize_audio(cfg: DictConfig) -> None:
     save_path.mkdir(parents=True, exist_ok=True)
     set_seed(cfg.training.seed)
 
-    cfg.model.params.hop_samples = 256 # SUPER DIRTY
+    cfg.model.params.hop_samples = 256  # SUPER DIRTY
 
-    if not args.run_name == 'pretrained_model':
+    if not args.run_name == "pretrained_model":
         model_names = glob.glob(
             f"outputs/{cfg.inference.run_name}/saved_models/*"
         )  # TODO later we pick the best
@@ -41,12 +41,12 @@ def synthesize_audio(cfg: DictConfig) -> None:
         model_name = cfg.inference.model_path
 
     dataloader = None
-    
+
     if not cfg.datamodule.params.unconditional:
         dataloader = load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
         dataloader.setup(inference=True)
-        dataloader= dataloader.inference_dataloader()
-    
+        dataloader = dataloader.inference_dataloader()
+
     print(f"### Loaded the dataloader: {dataloader}")
 
     lit_model = load_obj(cfg.training.lightning_module_name).load_from_checkpoint(
@@ -72,9 +72,14 @@ def synthesize_audio(cfg: DictConfig) -> None:
                     if "experiment_name" in logger.params.keys():
                         logger.params["experiment_name"] = run_name
                     loggers.append(load_obj(logger.class_name)(**logger.params))
-            trainer = pl.Trainer(logger=loggers, callbacks=[], **cfg.trainer,)
-            trainer.predict(lit_model, dataloaders= [dataloader])
-                
+            trainer = pl.Trainer(
+                logger=loggers,
+                callbacks=[],
+                **cfg.trainer,
+            )
+            trainer.predict(lit_model, dataloaders=[dataloader])
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Synthesize Audio with DiffWave")
     parser.add_argument(
@@ -83,9 +88,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--meta_data", help="meta_data_folder", type=str, default="./data"
     )
-    parser.add_argument(
-        "--device", help="Device", type=str, default="cpu"
-    )
+    parser.add_argument("--device", help="Device", type=str, default="cpu")
 
     args = parser.parse_args()
 
@@ -95,10 +98,10 @@ if __name__ == "__main__":
 
     cfg["inference"]["run_name"] = args.run_name
     cfg.datamodule.path_to_metadata = args.meta_data
-    
+
     print(cfg.inference.run_name)
 
-    if not args.run_name == 'pretrained_model':
+    if not args.run_name == "pretrained_model":
         path = f"outputs/{cfg.inference.run_name}/.hydra/config.yaml"
 
         with open(path) as cfg_load:
@@ -108,7 +111,7 @@ if __name__ == "__main__":
 
     cfg["inference"]["run_name"] = args.run_name
     cfg.datamodule.path_to_metadata = args.meta_data
-    if args.device == 'gpu':
-        cfg.trainer.accelerator = 'gpu'
+    if args.device == "gpu":
+        cfg.trainer.accelerator = "gpu"
         cfg.trainer.gpus = 1
     synthesize_audio(cfg)
