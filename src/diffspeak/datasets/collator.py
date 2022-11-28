@@ -77,7 +77,7 @@ def zero_pad(cfg, record, inference_len=None):
         if len(record["spectrogram"]) < required_len:
             pad_size_spectrogram = max(0, required_len - len(record["spectrogram"]))
             record["spectrogram"] = F.pad(
-                record["spectrogram"], (0, 0, pad_size_spectrogram, 0), "constant", 0
+                record["spectrogram"], (0, 0, 0, pad_size_spectrogram), "constant", 0
             )
         len_audio = required_len * cfg.datamodule.preprocessing.hop_samples
         delta_len_audio = len_audio - len(record["audio"])
