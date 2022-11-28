@@ -29,8 +29,19 @@ class Collator:
         return {
             "audio": audio,
             "spectrogram": spectrogram,
+            "filename": [record['filename'] for record in minibatch if 'filename' in record] if "filename" in minibatch[0].keys() else None
         }
 
+class InferenceCollator(Collator):
+    def __init__(self, cfg) -> None:
+        super().__init__(cfg)
+    
+    def collate(self, minibatch):
+        max_len = max([record["spectrogram"].shape[0] for record in minibatch])
+        for record in minibatch:
+            zero_pad(self.cfg,record,max_len)
+            record['spectrogram'] = record['spectrogram'].T
+        return self.assamble(minibatch)
 
 class ZeroPadCollator(Collator):
     def __init__(self, cfg) -> None:
@@ -43,7 +54,7 @@ class ZeroPadCollator(Collator):
         return self.assamble(minibatch)
 
 
-def zero_pad(cfg, record):
+def zero_pad(cfg, record, inference_len=None):
     if cfg.datamodule.params.unconditional:
         if len(record["audio"]) < cfg.datamodule.params.audio_len:
             pad_size_audio = max(
@@ -51,19 +62,24 @@ def zero_pad(cfg, record):
             )
             record["audio"] = F.pad(record["audio"], (0, pad_size_audio), "constant", 0)
     else:
-        if len(record["spectrogram"]) < cfg.datamodule.params.crop_mel_frames:
+        required_len = cfg.datamodule.params.crop_mel_frames if inference_len is None else inference_len
+        
+        if len(record["spectrogram"]) < required_len:
             pad_size_spectrogram = max(
-                0, cfg.datamodule.params.crop_mel_frames - len(record["spectrogram"])
+                0, required_len - len(record["spectrogram"])
             )
-            len_audio = (
-                cfg.datamodule.params.crop_mel_frames
+            record["spectrogram"] = F.pad(
+                record["spectrogram"], (0,0, pad_size_spectrogram,0), "constant", 0
+            )
+        len_audio = (
+                required_len
                 * cfg.datamodule.preprocessing.hop_samples
             )
-            pad_size_audio = max(0, len_audio - len(record["audio"]))
-            record["audio"] = F.pad(record["audio"], (0, pad_size_audio), "constant", 0)
-            record["spectrogram"] = F.pad(
-                record["spectrogram"], (0, pad_size_spectrogram), "constant", 0
-            )
+        delta_len_audio = len_audio - len(record["audio"])
+        if delta_len_audio > 0:
+            record["audio"] = F.pad(record["audio"], (0, delta_len_audio), "constant", 0)
+        else:
+            record["audio"] = record["audio"][0:len_audio]
 
 
 def subsample(cfg, record):
