@@ -3,6 +3,7 @@ import warnings
 from pathlib import Path
 
 import hydra
+from hydra.utils import get_original_cwd 
 import pytorch_lightning as pl
 import torch
 from omegaconf import DictConfig, OmegaConf
@@ -49,6 +50,9 @@ def run(cfg: DictConfig) -> None:
 
     trainer = pl.Trainer(logger=loggers, callbacks=callbacks, **cfg.trainer,)
 
+    cfg.datamodule.path_to_metadata = Path(get_original_cwd()) / cfg.datamodule.path_to_metadata # Could also just give absolute paths 
+    sanity_check(cfg)
+    
     dm = load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
     dm.setup()
 
@@ -74,7 +78,6 @@ def run(cfg: DictConfig) -> None:
 
 @hydra.main(config_path="../configs", config_name="config")
 def run_model(cfg: DictConfig) -> None:
-    sanity_check(cfg)
     os.makedirs("logs", exist_ok=True)
     print(OmegaConf.to_yaml(cfg))
     if cfg.general.log_code:

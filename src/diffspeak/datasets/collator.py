@@ -69,7 +69,7 @@ def zero_pad(cfg, record):
 def subsample(cfg, record):
     if cfg.datamodule.params.unconditional:
         start = random.randint(
-            0, max(record["audio"].shape[-1] - cfg.datamodule.params.audio_len)
+            0, max(record["audio"].shape[-1] - cfg.datamodule.params.audio_len,0)
         )
         end = start + cfg.datamodule.params.audio_len
         record["audio"] = torch.squeeze(record["audio"][start:end])

@@ -20,6 +20,5 @@ def sanity_check(cfg):
         and cfg.datamodule.params.collator
         == "diffspeak.datasets.collator.ZeroPadCollator"
     ), "Handling too short audio in the collator is not necessary when remove_shorts = True"
-    assert (
-        Path(get_original_cwd()) / cfg.datamodule.path_to_metadata / "annotations.csv"
+    assert ( Path(cfg.datamodule.path_to_metadata) / "annotations.csv"
     ).exists()

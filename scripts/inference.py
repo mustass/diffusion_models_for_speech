@@ -5,7 +5,7 @@ from pathlib import Path
 import torch
 import torchaudio as T
 import yaml
-from hydra import compose, initialize
+import hydra
 from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
 
@@ -31,13 +31,16 @@ def synthesize_audio(cfg: DictConfig) -> None:
         f"outputs/{cfg.inference.run_name}/saved_models/*"
     )  # TODO later we pick the best
     print(f"### Found these models: {model_names}, will use {model_names[1]}")
-    dataloader = (
-        load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
-        .setup(inference=True)
-        .test_dataloader()
-        if not cfg.datamodule.params.unconditional
-        else None
-    )
+
+    cfg.datamodule.path_to_metadata = '/zhome/ef/8/160495/DL2022/diffusion_for_speech/data'
+    cfg.model.params.hop_samples = 256 # SUPER DIRTY
+    dataloader = None
+    
+    if not cfg.datamodule.params.unconditional:
+        dataloader = load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
+        dataloader.setup(inference=True)
+        dataloader= dataloader.test_dataloader()
+    
 
     print(f"### Loaded the dataloader: {dataloader}")
 
@@ -60,8 +63,9 @@ def synthesize_audio(cfg: DictConfig) -> None:
                 T.save(path, audio, cfg.datamodule.preprocessing.sample_rate)
         else:
             for i, batch in tqdm(enumerate(dataloader)):
+                print(batch.keys())
                 audio = lit_model(batch)
-                filename = Path(batch["filename"]).stem
+                filename = 'sound' #Path(batch["filename"]).stem # This does not work because Collator does not pass it on. 
                 path = save_path / f"synthesized_{filename}.wav"
                 T.save(path, audio, cfg.datamodule.preprocessing.sample_rate)
 
@@ -74,9 +78,9 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    initialize(config_path="../configs")
+    hydra.initialize(config_path="../configs")
 
-    inference_cfg = compose(config_name="config")
+    inference_cfg = hydra.compose(config_name="config")
 
     inference_cfg["inference"]["run_name"] = args.run_name
 

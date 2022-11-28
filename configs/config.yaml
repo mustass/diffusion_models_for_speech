@@ -2,14 +2,14 @@ defaults:
   - _self_
   - callbacks: callbacks
   - private: default
-  - datamodule: ljspeech
+  - datamodule: tjspeech_cond
   - inference: basic
   - logging: wandb
   - loss: L1loss
   - metric: mae
   - model: diffwave_base
   - optimizer: adam
-  - scheduler: linearwithwarmup
+  - scheduler: cosine
   - trainer: default_trainer
   - training: lj_training
   - override hydra/hydra_logging: colorlog

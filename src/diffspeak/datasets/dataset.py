@@ -16,8 +16,7 @@ class AudioDataset(torch.utils.data.Dataset):
         self.cfg = cfg
         self.df = pd.read_csv(
             str(
-                Path(get_original_cwd())
-                / cfg.datamodule.path_to_metadata
+                Path(cfg.datamodule.path_to_metadata)
                 / "annotations.csv"
             )
         )
