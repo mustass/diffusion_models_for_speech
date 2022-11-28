@@ -1,6 +1,5 @@
 #!/bin/sh
-#BSUB -q gpuv100
-#BSUB -R "select[gpu32gb]"
+#BSUB -q gpua40
 #BSUB -gpu "num=1"
 #BSUB -J DiffWave
 #BSUB -n 1

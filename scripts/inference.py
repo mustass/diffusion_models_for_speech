@@ -27,13 +27,18 @@ def synthesize_audio(cfg: DictConfig) -> None:
     save_path.mkdir(parents=True, exist_ok=True)
     set_seed(cfg.training.seed)
 
-    model_names = glob.glob(
-        f"outputs/{cfg.inference.run_name}/saved_models/*"
-    )  # TODO later we pick the best
-    print(f"### Found these models: {model_names}, will use {model_names[1]}")
-
     cfg.datamodule.path_to_metadata = '/zhome/ef/8/160495/DL2022/diffusion_for_speech/data'
     cfg.model.params.hop_samples = 256 # SUPER DIRTY
+    model_name = 'outputs/pretrained_model/saved_models/checkpoint_pl.ckpt'
+
+    if not args.run_name == 'pretrained_model':
+        model_names = glob.glob(
+            f"outputs/{cfg.inference.run_name}/saved_models/*"
+        )  # TODO later we pick the best
+        print(f"### Found these models: {model_names}, will use {model_names[1]}")
+        model_name = model_names[1]
+
+
     dataloader = None
     
     if not cfg.datamodule.params.unconditional:
@@ -41,11 +46,10 @@ def synthesize_audio(cfg: DictConfig) -> None:
         dataloader.setup(inference=True)
         dataloader= dataloader.test_dataloader()
     
-
     print(f"### Loaded the dataloader: {dataloader}")
 
     lit_model = load_obj(cfg.training.lightning_module_name).load_from_checkpoint(
-        checkpoint_path=model_names[1], cfg=cfg
+        checkpoint_path=model_name, cfg=cfg
     )
     lit_model.to(device)
     lit_model.eval()
@@ -80,18 +84,22 @@ if __name__ == "__main__":
 
     hydra.initialize(config_path="../configs")
 
+<<<<<<< HEAD
     inference_cfg = hydra.compose(config_name="config")
+=======
+    cfg = compose(config_name="config_pretrained")
+>>>>>>> 4c60912 (add pretrained support)
 
-    inference_cfg["inference"]["run_name"] = args.run_name
+    cfg["inference"]["run_name"] = args.run_name
 
-    print(inference_cfg.inference.run_name)
+    print(cfg.inference.run_name)
 
-    path = f"outputs/{inference_cfg.inference.run_name}/.hydra/config.yaml"
+    if not args.run_name == 'pretrained_model':
+        path = f"outputs/{cfg.inference.run_name}/.hydra/config.yaml"
 
-    with open(path) as cfg:
-        cfg_yaml = yaml.safe_load(cfg)
-    cfg_yaml["inference"] = inference_cfg["inference"]
-
-    cfg = OmegaConf.create(cfg_yaml)
+        with open(path) as cfg_load:
+            cfg_yaml = yaml.safe_load(cfg_load)
+        cfg_yaml["inference"] = cfg["inference"]
+        cfg = OmegaConf.create(cfg_yaml)
 
     synthesize_audio(cfg)

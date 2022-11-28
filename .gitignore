@@ -105,6 +105,6 @@ cookiecutter-pypackage-env/
 data/*
 !data/annotations.csv
 data/*/**
-outputs/
-!outputs/pretrained_model
+outputs/*
+!outputs/pretrained_model/
 *.ipynb_checkpoints
