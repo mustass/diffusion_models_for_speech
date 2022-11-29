@@ -56,7 +56,8 @@ def run(cfg: DictConfig) -> None:
 
     cfg.datamodule.path_to_metadata = (
         Path(get_original_cwd()) / cfg.datamodule.path_to_metadata
-    )  # Could also just give absolute paths
+    )
+    cfg.model.checkpoint_path = (Path(get_original_cwd()) / cfg.model.checkpoint_path)
     sanity_check(cfg)
 
     dm = load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
