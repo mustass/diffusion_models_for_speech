@@ -82,7 +82,8 @@ class Preprocessor:
             spectrogram = torch.clamp((spectrogram + 100) / 100, 0.0, 1.0)
             Path(spec_path).parent.mkdir(exist_ok=True, parents=True)
             torch.save(
-                spectrogram.cpu(), spec_path,
+                spectrogram.cpu(),
+                spec_path,
             )
 
     def preprocess_audio_file(self, audio_path):

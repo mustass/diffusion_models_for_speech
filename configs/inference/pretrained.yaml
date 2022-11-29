@@ -1,0 +1,7 @@
+
+run_name: pretrained_model
+model_path: outputs/pretrained_model/saved_models/checkpoint_pl.ckpt
+device: gpu
+audio_path: /dtu/blackhole/19/s176453/diffusion_for_speech/synthesized_audio/${inference.run_name} @Sandor, here 
+n_audiofiles: 1
+#lang: en
