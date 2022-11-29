@@ -62,7 +62,9 @@ def run(cfg: DictConfig) -> None:
     dm = load_obj(cfg.datamodule.datamodule_name)(cfg=cfg)
     dm.setup()
 
-    model = load_obj(cfg.training.lightning_module_name)(cfg=cfg)
+    model = load_obj(cfg.training.lightning_module_name)(cfg=cfg).load_from_checkpoint(
+        checkpoint_path=cfg.model.checkpoint_path, cfg=cfg
+    )
     trainer.fit(model, dm)
 
     if cfg.general.save_pytorch_model:
@@ -82,7 +84,7 @@ def run(cfg: DictConfig) -> None:
             torch.save(model.model.state_dict(), model_name)
 
 
-@hydra.main(config_path="../configs", config_name="config_training")
+@hydra.main(config_path="../configs", config_name="config_finetuning")
 def run_model(cfg: DictConfig) -> None:
     os.makedirs("logs", exist_ok=True)
     print(OmegaConf.to_yaml(cfg))

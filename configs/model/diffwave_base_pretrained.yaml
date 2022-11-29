@@ -1,4 +1,5 @@
 class_name: diffspeak.models.DiffWave
+checkpoint_path: ./outputs/pretrained_model/saved_models/checkpoint_pl.ckpt
 params:
   residual_layers: 30
   residual_channels: 64

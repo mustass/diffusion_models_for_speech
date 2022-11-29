@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     hydra.initialize(config_path="../configs")
 
-    cfg = hydra.compose(config_name="config_pretrained")
+    cfg = hydra.compose(config_name="config_synthesis")
 
     cfg["inference"]["run_name"] = args.run_name
     cfg.datamodule.path_to_metadata = args.meta_data
