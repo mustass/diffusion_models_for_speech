@@ -7,7 +7,7 @@ params:
   batch_size: 16
   split: [0.98,0.01,0.01]
   num_workers: 4
-  audio_len: 16000 # Lengths: min 24477, max:222621, mean:144952 median:149149 So I am not sure what to select here. 
+  audio_len: 16000 
   crop_mel_frames: 62 # Maybe not correct?
   pin_memory: True
   collator: diffspeak.datasets.collator.Collator
