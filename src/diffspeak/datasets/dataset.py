@@ -19,6 +19,7 @@ class AudioDataset(torch.utils.data.Dataset):
         )
 
         self.df = self.df[self.df["split"] == int(inference)]
+        self.df = self.df[self.df["language"].map(lambda l: l in self.cfg.datamodule.params.datasets)]
         if self.cfg.datamodule.params.remove_shorts:
             # TODO: conditional case?
             self.df = self.df[
