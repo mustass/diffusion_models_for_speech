@@ -47,11 +47,11 @@ def synthesize_audio(cfg: DictConfig) -> None:
         else:
             run_name = os.path.basename(os.getcwd())
             loggers = []
-            if cfg.logging.log:
+            """if cfg.logging.log:
                 for logger in cfg.logging.loggers:
                     if "experiment_name" in logger.params.keys():
                         logger.params["experiment_name"] = run_name
-                    loggers.append(load_obj(logger.class_name)(**logger.params))
+                    loggers.append(load_obj(logger.class_name)(**logger.params))"""
             trainer = pl.Trainer(
                 logger=loggers,
                 callbacks=[],
@@ -87,14 +87,14 @@ def main(cfg: DictConfig):
     # If we want to use a custom trained / finetuned model
     # Then copy all of the contents of the config file of that training session
     # And append the inference related contents of this current config file to that
-    if "pretrained_model" not in cfg.inference.run_name:
+    """if "pretrained_model" not in cfg.inference.run_name:
         path = Path(cfg.inference.run_path)/".hydra" / "config.yaml"
         with open(path) as cfg_load:
             cfg_yaml = yaml.safe_load(cfg_load)
         cfg_yaml["inference"] = cfg["inference"]
         cfg_yaml["datamodule"] = cfg["datamodule"]
 
-        cfg = OmegaConf.create(cfg_yaml)
+        cfg = OmegaConf.create(cfg_yaml)"""
 
     # SUPER DIRTY
     cfg.model.params.hop_samples = 256  

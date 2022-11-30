@@ -3,7 +3,7 @@ defaults:
   - callbacks: callbacks
   - private: default
   - datamodule: tjspeech_cond_pretrained
-  - inference: pretrained
+  - inference: finetuned
   - logging: wandb
   - loss: L1loss
   - metric: mae
