@@ -1,0 +1,6 @@
+run_name: pretrained_model
+run_path: /dtu/blackhole/19/s176453/model_checkpoints/EN_model_finetuned_to_DA/2022-11-29_20-53-04/
+model_path: epoch=0-val_mae=0.027694.ckpt
+audio_path: /dtu/blackhole/19/s176453/diffusion_for_speech/synthesized_audio/default
+device: gpu
+#lang: en

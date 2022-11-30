@@ -1,7 +1,10 @@
 
-run_name: pretrained_model
-model_path: outputs/pretrained_model/saved_models/checkpoint_pl.ckpt
+run_name: 2022-11-29_20-53-04
+model_path: outputs/2022-11-29_20-53-04/saved_models/epoch=0-val_mae=0.027694.ckpt
+# refactor by saf
+run_path: /dtu/blackhole/19/s176453/model_checkpoints/EN_model_finetuned_to_DA/2022-11-29_20-53-04/
+checkpoint_name: epoch=0-val_mae=0.027694.ckpt
 device: gpu
-audio_path: /dtu/blackhole/19/s176453/diffusion_for_speech/synthesized_audio/${inference.run_name} @Sandor, here 
+audio_path: /dtu/blackhole/19/s176453/diffusion_for_speech/synthesized_audio/tj/epoch=0-val_mae=0.027694
 n_audiofiles: 1
 #lang: en

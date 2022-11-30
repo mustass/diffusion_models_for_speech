@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 
 import hydra
+from hydra.utils import get_original_cwd
+
 import pytorch_lightning as pl
 import torch
 import torchaudio as T
@@ -71,14 +73,7 @@ def load_dataloader(cfg):
 
 
 def load_model(cfg):
-    if not cfg.inference.run_name == "pretrained_model":
-        model_names = glob.glob(
-            f"outputs/{cfg.inference.run_name}/saved_models/*"
-        )  # TODO later we pick the best
-        print(f"### Found these models: {model_names}, will use {model_names[1]}")
-        model_name = model_names[1]
-    else:
-        model_name = cfg.inference.model_path
+    model_name = Path(cfg.inference.run_path) / "saved_models" / cfg.inference.checkpoint_name
     lit_model = load_obj(cfg.training.lightning_module_name).load_from_checkpoint(
         checkpoint_path=model_name, cfg=cfg
     )
@@ -88,12 +83,12 @@ def load_model(cfg):
 
 
 @hydra.main(config_path="../configs", config_name="config_synthesis")
-def main():
+def main(cfg: DictConfig):
     # If we want to use a custom trained / finetuned model
     # Then copy all of the contents of the config file of that training session
     # And append the inference related contents of this current config file to that
-    if not cfg.inference.run_name == "pretrained_model":
-        path = f"outputs/{cfg.inference.run_name}/.hydra/config.yaml"
+    if "pretrained_model" not in cfg.inference.run_name:
+        path = Path(cfg.inference.run_path)/".hydra" / "config.yaml"
         with open(path) as cfg_load:
             cfg_yaml = yaml.safe_load(cfg_load)
         cfg_yaml["inference"] = cfg["inference"]
@@ -103,6 +98,9 @@ def main():
 
     # SUPER DIRTY
     cfg.model.params.hop_samples = 256  
+    cfg.datamodule.path_to_metadata = (
+        Path(get_original_cwd()) / cfg.datamodule.path_to_metadata
+    )  # Could also just give absolute paths
 
     print(cfg.inference.run_name)
 
