@@ -13,4 +13,4 @@ source path_to_your_venv
 
 wandb login your_wandb_key
 echo "Running script..."
-python3 ./scripts/inference.py --run_name=pretrained_model --device=gpu
+python3 ./scripts/inference.py inference.run_name=pretrained_model inference.device=gpu datamodule=nst_da_cond
