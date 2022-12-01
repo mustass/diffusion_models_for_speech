@@ -4,12 +4,11 @@ import os
 from pathlib import Path
 
 import hydra
-from hydra.utils import get_original_cwd
-
 import pytorch_lightning as pl
 import torch
 import torchaudio as T
 import yaml
+from hydra.utils import get_original_cwd
 from omegaconf import DictConfig, OmegaConf
 from tqdm import tqdm
 
@@ -45,13 +44,7 @@ def synthesize_audio(cfg: DictConfig) -> None:
                 path = save_path / f"audio_{i}.wav"
                 T.save(path, audio, cfg.datamodule.preprocessing.sample_rate)
         else:
-            run_name = os.path.basename(os.getcwd())
             loggers = []
-            """if cfg.logging.log:
-                for logger in cfg.logging.loggers:
-                    if "experiment_name" in logger.params.keys():
-                        logger.params["experiment_name"] = run_name
-                    loggers.append(load_obj(logger.class_name)(**logger.params))"""
             trainer = pl.Trainer(
                 logger=loggers,
                 callbacks=[],
@@ -73,7 +66,9 @@ def load_dataloader(cfg):
 
 
 def load_model(cfg):
-    model_name = Path(cfg.inference.run_path) / "saved_models" / cfg.inference.checkpoint_name
+    model_name = (
+        Path(cfg.inference.run_path) / "saved_models" / cfg.inference.checkpoint_name
+    )
     lit_model = load_obj(cfg.training.lightning_module_name).load_from_checkpoint(
         checkpoint_path=model_name, cfg=cfg
     )
@@ -88,16 +83,16 @@ def main(cfg: DictConfig):
     # Then copy all of the contents of the config file of that training session
     # And append the inference related contents of this current config file to that
     """if "pretrained_model" not in cfg.inference.run_name:
-        path = Path(cfg.inference.run_path)/".hydra" / "config.yaml"
-        with open(path) as cfg_load:
-            cfg_yaml = yaml.safe_load(cfg_load)
-        cfg_yaml["inference"] = cfg["inference"]
-        cfg_yaml["datamodule"] = cfg["datamodule"]
+    path = Path(cfg.inference.run_path)/".hydra" / "config.yaml"
+    with open(path) as cfg_load:
+        cfg_yaml = yaml.safe_load(cfg_load)
+    cfg_yaml["inference"] = cfg["inference"]
+    cfg_yaml["datamodule"] = cfg["datamodule"]
 
-        cfg = OmegaConf.create(cfg_yaml)"""
+    cfg = OmegaConf.create(cfg_yaml)"""
 
     # SUPER DIRTY
-    cfg.model.params.hop_samples = 256  
+    cfg.model.params.hop_samples = 256
     cfg.datamodule.path_to_metadata = (
         Path(get_original_cwd()) / cfg.datamodule.path_to_metadata
     )  # Could also just give absolute paths
@@ -111,5 +106,6 @@ def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
     synthesize_audio(cfg)
 
+
 if __name__ == "__main__":
-   main()
+    main()
