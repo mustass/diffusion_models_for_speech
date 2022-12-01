@@ -199,7 +199,7 @@ class LitDiffWaveModel(pl.LightningModule):
         dataloader_idx: int = 0,
     ):
         audio = self(batch)
-        print(f"Output is of shape: {audio.shape}")
+        # print(f"Output is of shape: {audio.shape}")
         for wav in range(audio.shape[0]):
             filename = Path(batch["filename"][wav]).stem
             path = Path(self.cfg.inference.audio_path) / f"synthesized_{filename}.wav"
