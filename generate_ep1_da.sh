@@ -13,4 +13,4 @@ source /zhome/ed/0/170279/Github/deep-learning/venv/bin/activate
 
 wandb login 6fee9cf3b83c356e644334bb6ec3ebb0169f2de3
 echo "Running script..."
-python3 ./scripts/inference.py datamodule=nst_da_cond inference=epoch1 inference.audio_path=/dtu/blackhole/19/s176453/diffusion_for_speech/synthesized_audio/experiment1/epoch1/nst_da datamodule.params.batch_size=1
+python3 ./scripts/inference.py datamodule=nst_da_cond inference=epoch1 inference.audio_path=/dtu/blackhole/19/s176453/diffusion_for_speech/synthesized_audio/experiment1/epoch1/nst_danish datamodule.params.batch_size=1
