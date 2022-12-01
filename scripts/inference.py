@@ -102,7 +102,7 @@ def main(cfg: DictConfig):
         Path(get_original_cwd()) / cfg.datamodule.path_to_metadata
     )  # Could also just give absolute paths
 
-    print(cfg.inference.run_name)
+    # print(cfg.inference.run_name)
 
     if cfg.inference.device == "gpu":
         cfg.trainer.accelerator = "gpu"

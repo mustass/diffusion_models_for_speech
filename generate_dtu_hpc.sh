@@ -9,8 +9,8 @@
 #BSUB -e logs/%J.err
 echo
 module load python3/3.9.11
-source path_to_your_venv
+source /zhome/ed/0/170279/Github/deep-learning/venv/bin/activate
 
-wandb login your_wandb_key
+wandb login 6fee9cf3b83c356e644334bb6ec3ebb0169f2de3
 echo "Running script..."
-python3 ./scripts/inference.py inference.run_name=pretrained_model inference.device=gpu datamodule=nst_da_cond
+python3 ./scripts/inference.py
