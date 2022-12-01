@@ -1,6 +1,4 @@
-from omegaconf import DictConfig, OmegaConf
 import argparse
-import hydra
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -9,15 +7,18 @@ import pathlib
 import glob
 import torchaudio
 import torch.nn.functional as F
+from torchmetrics.audio.stoi import ShortTimeObjectiveIntelligibility
+from torchmetrics import SignalNoiseRatio
 
 
-def process_annotated_csv(cfg: DictConfig) -> None:
+def process_annotated_csv(annotations_path) -> None:
     """
     Load annotated.csv and extract dataset and filenames
     of generated files
     """
 
-    annotations_path = Path(cfg.evaluate.annotations_path)
+    annotations_path = Path(annotations_path)
+
     ann_data = pd.read_csv(annotations_path)
     ann_data = ann_data[['audio_path', 'split']]
     ann_data = ann_data[ann_data['split'] == 1]
@@ -26,21 +27,25 @@ def process_annotated_csv(cfg: DictConfig) -> None:
     ann_data['audio_files'] = ann_data['audio_files'].apply(lambda x : x.name if '.' in x.suffix  else np.nan)
     return ann_data
 
-def calculate_metrics(ann_dataset_specific, dataset_path, cfg: DictConfig) -> None:
+def calculate_metrics(ann_dataset_specific, dataset_path, sr) -> None:
     """
     Calculate stoi and snr
     """
 
     gen_files_path = glob.glob(str(dataset_path) +  '/*.wav')
-    stoi = []
-    snr = []
+    snr = SignalNoiseRatio()
+    stoi = ShortTimeObjectiveIntelligibility(sr, False)
+
+    stoi_total = []
+    snr_total = []
+    files = []
 
     for gen_path in gen_files_path:
 
         gen_file = pathlib.PurePath(gen_path).name.split("_")[1]
     
         matched_row  = ann_dataset_specific[ann_dataset_specific['audio_files'] == gen_file]
-        input_file_path = matched_row['audio_path']
+        input_file_path = matched_row['audio_path'].iloc[0]
 
         target, sr_target = torchaudio.load(input_file_path)
         pred, sr_pred = torchaudio.load(gen_path)
@@ -52,40 +57,66 @@ def calculate_metrics(ann_dataset_specific, dataset_path, cfg: DictConfig) -> No
         else:
             pred = F.pad(pred,(0, target.shape[1] - pred.shape[1]), "constant", 0)
 
-        stoi.append(float(stoi(pred,target)))
-        snr.append(float(snr(pred,target)))
-    return stoi, snr
+        stoi_total.append(float(stoi(pred,target)))
+        snr_total.append(float(snr(pred,target)))
+        files.append(gen_file)
+    return stoi_total, snr_total,files
     
 
-def create_csv(ann_data, cfg: DictConfig) -> None:
+def create_csv(ann_data, save_path, generated_path, experiment, model) -> None:
     """
     Add metrics to overall csv file
     """
+    filename = 'exp_' + experiment + '_metrics.csv'
+    filepath = save_path / filename
+    try:
+        df_data = pd.read_csv(filepath, index_col = 0)
+        
+    except FileNotFoundError:
+        df_data = pd.DataFrame()
 
-    for dataset_path in os.walk(cfg.evaluate.generated_path):
-        dataset = pathlib.Purepath(dataset_path[0].name)
-        ann_dataset_specific = ann_data[ann_data['dataset'] == dataset]
-        stoi, snr = calculate_metrics(ann_dataset_specific, cfg)
-
-    
+        
+    for subdir, dirs, files in os.walk(generated_path):
+        for dataset in dirs:
+            dataset_path = Path(subdir) / Path(dataset)
+            ann_dataset_specific = ann_data[ann_data['dataset'] == dataset]
+            stoi, snr, files = calculate_metrics(ann_dataset_specific, dataset_path, args.sr)
+            new_metrics = {'stoi': stoi,
+                           'snr': snr,           
+                           'audio_file': files,
+                           'model': [model] * len(stoi),
+                           'dataset': [dataset] * len(stoi)}
+            df_data = df_data.append(pd.DataFrame(new_metrics))
+        
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    df_data.to_csv(filepath)
 
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser(description="Calculate STOI and SNR evaluation metrics")
+
     parser.add_argument(
-        "--epoch", help="Epoch", type=str, default='0'
+        "--synthesis_dir", help="synthesized data folder", type=str, default="/dtu/blackhole/19/s176453/diffusion_for_speech/synthesized_audio"
+    )
+    parser.add_argument(
+        "--experiment", help="Experiment", type=str, default='1'
+    )
+    parser.add_argument(
+        "--model", help="Model", type=str, default='epoch0'
     )
     parser.add_argument(
         "--meta_data", help="meta_data_folder", type=str, default="./data/annotations.csv"
     )
-    
+    parser.add_argument(
+        "--sr", help="Sampling Rate", type=int, default=22050
+    )
+    parser.add_argument(
+        "--save_dir", help="Saved Metrics folder", type=str, default="/dtu/blackhole/19/s176453/diffusion_for_speech/evaluate"
+    )
+
     args = parser.parse_args()
 
-    hydra.initialize(config_path="../configs")
-
-    cfg = hydra.compose(config_name="config_evaluate")
-
-    cfg["evaluate"]["epoch"] = args.epoch
-    cfg.evaluate.annotations_path = args.meta_data
-    print(cfg.evaluate.epoch)
-    ann_data = process_annotated_csv(cfg)
-    create_csv(ann_data, cfg)
+    ann_data = process_annotated_csv(args.meta_data)
+    generated_path = Path(args.synthesis_dir) / ('experiment' + args.experiment + '/' + args.model)
+    save_path = Path(args.save_dir) 
+    create_csv(ann_data, save_path, generated_path, args.experiment, args.model )
