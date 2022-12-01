@@ -108,6 +108,7 @@ def main(cfg: DictConfig):
         cfg.trainer.accelerator = "gpu"
         cfg.trainer.gpus = 1
 
+    print(OmegaConf.to_yaml(cfg))
     synthesize_audio(cfg)
 
 if __name__ == "__main__":

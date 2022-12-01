@@ -3,8 +3,8 @@ defaults:
   - callbacks: callbacks
   - private: default
   - datamodule: nst_da_cond
-  - inference: pretrained
   - logging: wandb
+  - inference: basic
   - loss: L1loss
   - metric: mae
   - model: diffwave_base_pretrained
