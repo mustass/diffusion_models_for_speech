@@ -2,9 +2,9 @@ defaults:
   - _self_
   - callbacks: callbacks
   - private: default
-  - datamodule: tjspeech_cond_pretrained
-  - inference: pretrained
+  - datamodule: nst_da_cond
   - logging: wandb
+  - inference: basic
   - loss: L1loss
   - metric: mae
   - model: diffwave_base_pretrained

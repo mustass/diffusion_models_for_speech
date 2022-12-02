@@ -1,0 +1,5 @@
+run_path: /dtu/blackhole/19/s176453/diffusion_for_speech/model_checkpoints/EN_model_finetuned_to_DA/2022-11-29_20-53-04/
+checkpoint_name: epoch=1-val_mae=0.026175.ckpt
+audio_path: /dtu/blackhole/19/s176453/diffusion_for_speech/synthesized_audio/experiment1/default
+device: gpu
+#lang: en
