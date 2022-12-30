@@ -1,11 +1,20 @@
 # Diffusion models for speech synthesis
 
+## Experiments Notebook
+
+[RESTULTS NOTEBOOK](notebooks/present_metrics_demo.ipynb)
+
+
 ## Background
 
 DiffWave approach [https://arxiv.org/abs/2009.09761]. 
 
 ## Data 
+
+English speech:
 [https://keithito.com/LJ-Speech-Dataset/]
+Danish speech:
+[https://sprogteknologi.dk/dataset/nst-acoustic-database-for-danish-16-khz]
 
 ## Repo structure
 This repo takes advantage of two frameworks: (1) Hydra for configs management and (2) Pytorch Lightning for improving our lives when colaborating and running experiments on different hardware. 
